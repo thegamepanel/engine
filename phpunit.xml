@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         testdox="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+            <directory>src</directory>
+        </include>
+        <exclude>
+            <!-- Shared: enum, interfaces, value objects -->
+            <file>src/Domain/Shared/OperatingContext.php</file>
+            <file>src/Domain/Shared/AuthContext.php</file>
+            <file>src/Domain/Shared/Cancellable.php</file>
+            <file>src/Domain/Shared/RecordsEvents.php</file>
+            <file>src/Kernel/Contracts/EventDispatcher.php</file>
+            <file>src/Kernel/Contracts/RecordsLifecycleEvents.php</file>
+
+            <!-- User: interfaces, IDs, DTOs, events, read models -->
+            <file>src/Domain/User/UserRepository.php</file>
+            <file>src/Domain/User/UserId.php</file>
+            <file>src/Domain/User/ReadModels/UserResult.php</file>
+            <file>src/Domain/User/Commands/RegisterUser.php</file>
+            <file>src/Domain/User/Events/UserRegistered.php</file>
+            <file>src/Domain/User/Events/UserEmailChanged.php</file>
+            <file>src/Domain/User/Events/UserPasswordChanged.php</file>
+
+            <!-- AuthToken: interfaces, IDs, DTOs, events, exceptions, hooks -->
+            <file>src/Domain/AuthToken/AuthTokenRepository.php</file>
+            <file>src/Domain/AuthToken/AuthTokenId.php</file>
+            <file>src/Domain/AuthToken/Device.php</file>
+            <file>src/Domain/AuthToken/UnhashedToken.php</file>
+            <file>src/Domain/AuthToken/Commands/AuthenticateUser.php</file>
+            <file>src/Domain/AuthToken/Commands/AuthenticationResult.php</file>
+            <file>src/Domain/AuthToken/Commands/FlagAuthTokenUsage.php</file>
+            <file>src/Domain/AuthToken/Events/AuthTokenRevoked.php</file>
+            <file>src/Domain/AuthToken/Events/UserAuthenticated.php</file>
+            <file>src/Domain/AuthToken/Exceptions/AuthenticationFailed.php</file>
+            <file>src/Domain/AuthToken/Exceptions/InvalidCredentials.php</file>
+            <file>src/Domain/AuthToken/Exceptions/UnableToAuthenticate.php</file>
+            <file>src/Domain/AuthToken/Hooks/AuthenticatingUser.php</file>
+
+            <!-- Kernel: service providers, framework glue -->
+            <file>src/Kernel/KernelServiceProvider.php</file>
+            <file>src/Kernel/Concerns/HandlesIlluminateConnections.php</file>
+            <file>src/Kernel/User/UserDomainServiceProvider.php</file>
+            <file>src/Kernel/AuthToken/AuthTokenDomainServiceProvider.php</file>
+            <file>src/Kernel/Account/AccountDomainServiceProvider.php</file>
+            <file>src/Kernel/Permission/PermissionDomainServiceProvider.php</file>
+
+            <!-- App: service providers -->
+            <file>app/Providers/AppServiceProvider.php</file>
+            <file>app/Providers/DevServiceProvider.php</file>
+            <file>app/Providers/TelescopeServiceProvider.php</file>
+        </exclude>
+    </source>
+    <coverage>
+        <report>
+            <html outputDirectory="build/coverage"/>
+            <text outputFile="build/coverage.txt"/>
+            <clover outputFile="build/logs/clover.xml"/>
+        </report>
+    </coverage>
+    <logging>
+        <junit outputFile="build/report.junit.xml"/>
+    </logging>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+    </php>
+</phpunit>
