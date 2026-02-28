@@ -49,6 +49,8 @@ final readonly class Binding
 
     public bool $lazily;
 
+    public bool $liminal;
+
     /**
      * @var (\Closure(): TAbstract)|null
      */
@@ -64,6 +66,7 @@ final readonly class Binding
      * @param array<class-string>                                                         $aliases
      * @param bool                                                                        $shared
      * @param bool                                                                        $lazily
+     * @param bool                                                                        $liminal
      * @param (\Closure(): TAbstract)|null                                                $factory
      */
     public function __construct(
@@ -76,6 +79,7 @@ final readonly class Binding
         array    $aliases = [],
         bool     $shared = true,
         bool     $lazily = false,
+        bool     $liminal = false,
         ?Closure $factory = null
     )
     {
@@ -88,6 +92,7 @@ final readonly class Binding
         $this->aliases      = $aliases;
         $this->shared       = $shared;
         $this->lazily       = $lazily;
+        $this->liminal      = $liminal;
         $this->factory      = $factory;
     }
 

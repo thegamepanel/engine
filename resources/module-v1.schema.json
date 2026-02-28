@@ -1,0 +1,116 @@
+{
+  "$schema"    : "https://json-schema.org/draft/2020-12/schema",
+  "$id"        : "https://thegamepanel.com/schemas/module/v1.schema.json",
+  "title"      : "The Game Panel Module",
+  "description": "Schema for The Game Panel module.json configuration files.",
+  "type"       : "object",
+  "required"   : ["type", "name", "version", "registrar", "requires"],
+  "properties" : {
+    "type"        : {
+      "const"      : "module",
+      "description": "The package type. Currently only 'module' is supported."
+    },
+    "name"        : {
+      "type"       : "string",
+      "description": "Human-readable display name of the module.",
+      "minLength"  : 1,
+      "maxLength"  : 100
+    },
+    "description" : {
+      "type"       : "string",
+      "description": "Short summary of what the module does.",
+      "maxLength"  : 500
+    },
+    "version"     : {
+      "type"       : "string",
+      "description": "Semantic version of the module.",
+      "pattern"    : "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "registrar"   : {
+      "type"       : "string",
+      "description": "Fully-qualified class name of the module's registrar class. This class uses attributes to declare which collectors it responds to."
+    },
+    "author"      : {
+      "description": "Module author information.",
+      "oneOf"      : [
+        {
+          "type": "string"
+        },
+        {
+          "type"                : "object",
+          "required"            : ["name"],
+          "properties"          : {
+            "name" : {
+              "type": "string"
+            },
+            "email": {
+              "type"  : "string",
+              "format": "email"
+            },
+            "url"  : {
+              "type"  : "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "license"     : {
+      "type"       : "string",
+      "description": "SPDX license identifier."
+    },
+    "urls"        : {
+      "type"                : "object",
+      "description"         : "Related URLs. Keys are freeform (e.g. homepage, issues, docs, source, updates).",
+      "additionalProperties": {
+        "type"  : "string",
+        "format": "uri"
+      }
+    },
+    "icon"        : {
+      "type"       : "string",
+      "description": "Path to the module icon relative to the module root."
+    },
+    "requires"    : {
+      "type"       : "string",
+      "description": "Minimum Engine version required (Composer-style constraint, e.g. ^1.0, >=1.5 <3.0)."
+    },
+    "keywords"    : {
+      "type"       : "array",
+      "description": "Keywords for marketplace search and filtering.",
+      "items"      : {
+        "type"   : "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "uniqueItems": true
+    },
+    "capabilities": {
+      "type"       : "array",
+      "description": "System-level capabilities this module requires. The kernel only permits operations matching declared capabilities.",
+      "items"      : {
+        "type": "string",
+        "enum": [
+          "unrestricted",
+          "cross-validate",
+          "cross-settings",
+          "cross-routes",
+          "cross-storage",
+          "extend-schema",
+          "modify-ui",
+          "system-commands",
+          "daemon-access"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "collectors"  : {
+      "type"       : "array",
+      "description": "Fully-qualified class names of CollectorHandler implementations this module provides. Each handler's collects() method determines which Collector type it handles.",
+      "items"      : {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  }
+}

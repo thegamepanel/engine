@@ -91,7 +91,8 @@ final class GenericResolver implements Resolver
             $type->getName(),
             $arguments,
             $dependency->name,
-            $dependency->qualifier
+            $dependency->qualifier,
+            $dependency->liminal
         );
 
         return $instance;
@@ -151,7 +152,13 @@ final class GenericResolver implements Resolver
                 } else if ($binding->concrete !== null) {
                     /** @var class-string $bindingClass */
                     $bindingClass = $binding->concrete;
-                    $instance     = $container->resolve($bindingClass, $arguments, $dependency->name, $dependency->qualifier);
+                    $instance     = $container->resolve(
+                        $bindingClass,
+                        $arguments,
+                        $dependency->name,
+                        $dependency->qualifier,
+                        $dependency->liminal
+                    );
                 } else if ($binding->hasFactory()) {
                     $instance = $container->call($binding->factory, $arguments);
                 } else {

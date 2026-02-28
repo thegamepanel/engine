@@ -26,9 +26,7 @@ final readonly class Dependency
      * @param TResolvable|null                                                           $resolvable
      * @param bool                                                                       $hasDefault
      * @param TType|null                                                                 $default
-     *
-     * @phpstan-param TQualifier|null                                                    $qualifier
-     * @phpstan-param TResolvable|null                                                   $resolvable
+     * @param bool                                                                       $liminal
      */
     public function __construct(
         public string                                                                  $parameter,
@@ -39,6 +37,7 @@ final readonly class Dependency
         public ?Resolvable                                                             $resolvable = null,
         public bool                                                                    $hasDefault = false,
         public mixed                                                                   $default = null,
+        public bool                                                                    $liminal = false
     )
     {
     }

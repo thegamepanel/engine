@@ -1,18 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Engine;
+namespace Engine\Core;
 
 enum OperatingContext: string
 {
     case Account = 'account';
+
+    case Server = 'server';
 
     case Platform = 'platform';
 
     /**
      * @param array<string> $contexts
      *
-     * @return list<\Engine\OperatingContext>
+     * @return list<\Engine\Core\OperatingContext>
      */
     public static function collect(array $contexts): array
     {

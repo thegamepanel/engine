@@ -49,6 +49,11 @@ final class BindingBuilder
     private(set) bool $lazily = false;
 
     /**
+     * @var bool
+     */
+    private(set) bool $liminal = false;
+
+    /**
      * @var array<class-string>
      */
     private(set) array $aliases = [];
@@ -123,6 +128,18 @@ final class BindingBuilder
     public function lazily(): self
     {
         $this->lazily = true;
+
+        return $this;
+    }
+
+    /**
+     * Make instances liminal, allowing them to be garbage collected.
+     *
+     * @return $this
+     */
+    public function liminal(): self
+    {
+        $this->liminal = true;
 
         return $this;
     }

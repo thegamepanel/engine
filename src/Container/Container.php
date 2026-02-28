@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Engine\Container;
 
+use Engine\Container\Attributes\Liminal;
 use Engine\Container\Attributes\Named;
 use Engine\Container\Bindings\Binding;
 use Engine\Container\Bindings\BindingRegistry;
@@ -16,6 +17,7 @@ use InvalidArgumentException;
 use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
+use WeakReference;
 
 /**
  * Container
@@ -54,10 +56,18 @@ final class Container implements Contracts\Container
     private array $qualifiedInstances = [];
 
     /**
+     * @var array<class-string, \WeakReference>
+     */
+    private array $liminalInstances = [];
+
+    /**
      * @param \Engine\Container\Bindings\BindingRegistry   $bindings
      * @param \Engine\Container\Contracts\Resolver<*>|null $defaultResolver
      */
-    public function __construct(BindingRegistry $bindings, ?Resolver $defaultResolver = null)
+    public function __construct(
+        BindingRegistry $bindings,
+        ?Resolver       $defaultResolver = null
+    )
     {
         $this->bindings = $bindings;
 
@@ -90,11 +100,10 @@ final class Container implements Contracts\Container
      *
      * @param class-string<TResolvable> $resolvable
      * @param class-string<TResolver>   $resolver
-     * @param bool                      $default
      *
      * @return self
      */
-    public function registerResolver(string $resolvable, string $resolver, bool $default = false): static
+    private function registerResolver(string $resolvable, string $resolver): static
     {
         // We need to make sure that the class provided implements the
         // resolvable contract.
@@ -113,11 +122,6 @@ final class Container implements Contracts\Container
         /** @var TResolver $instance */
         $instance                     = $this->lazy($resolver);
         $this->resolvers[$resolvable] = $instance;
-
-        // If the default flag was provided, use this as the default resolver.
-        if ($default) {
-            $this->defaultResolver = $instance;
-        }
 
         return $this;
     }
@@ -213,6 +217,10 @@ final class Container implements Contracts\Container
     {
         $trueClass = $this->getTrueClass($class, $name, $qualifier);
 
+        if (isset($this->liminalInstances[$trueClass]) && $this->liminalInstances[$trueClass]->get() !== null) {
+            return $this->liminalInstances[$trueClass]->get();
+        }
+
         if ($name !== null) {
             /** @var TClass|null */
             return $this->namedInstances[$trueClass][$name->name] ?? null;
@@ -235,12 +243,19 @@ final class Container implements Contracts\Container
      * @param TClass                                     $instance
      * @param \Engine\Container\Attributes\Named|null    $name
      * @param \Engine\Container\Contracts\Qualifier|null $qualifier
+     * @param bool                                       $liminal
      *
      * @return TClass
      */
-    protected function storeResolved(object $instance, ?Named $name = null, ?Qualifier $qualifier = null): object
+    protected function storeResolved(object $instance, ?Named $name = null, ?Qualifier $qualifier = null, bool $liminal = false): object
     {
         $trueClass = $instance::class;
+
+        if ($liminal) {
+            $this->liminalInstances[$trueClass] = WeakReference::create($instance);
+
+            return $this;
+        }
 
         if ($name !== null) {
             return $this->namedInstances[$trueClass][$name->name] = $instance;
@@ -317,16 +332,15 @@ final class Container implements Contracts\Container
      *
      * @template TClass of object
      *
-     * @param class-string                 $class
-     * @param array<string, mixed>         $arguments
+     * @param class-string<TClass>                       $class
+     * @param array<string, mixed>                       $arguments
+     * @param \Engine\Container\Attributes\Named|null    $name
+     * @param \Engine\Container\Contracts\Qualifier|null $qualifier
+     * @param bool                                       $liminal
      *
-     * @phpstan-param class-string<TClass> $class
-     *
-     * @return object
-     *
-     * @phpstan-return TClass
+     * @return TClass
      */
-    public function resolve(string $class, array $arguments = [], ?Named $name = null, ?Qualifier $qualifier = null): object
+    public function resolve(string $class, array $arguments = [], ?Named $name = null, ?Qualifier $qualifier = null, bool $liminal = false): object
     {
         // If the class has already been resolved, use that instance.
         $instance = $this->getResolved($class, $name, $qualifier);
@@ -345,6 +359,9 @@ final class Container implements Contracts\Container
         // If we have a binding, we can use it to resolve the instance.
         if ($binding !== null) {
             $shared = $binding->shared;
+
+            // Honour the liminal setting in the method call.
+            $liminal = $liminal || $binding->liminal;
 
             if ($binding->isBoundToInstance()) {
                 // If it's bound to an instance, the hard work has been done.
@@ -373,6 +390,10 @@ final class Container implements Contracts\Container
             } else {
                 $instance = $this->invoke($trueClass, '__construct', $arguments);
             }
+
+            if ($liminal === false && $this->getAttributeInstance($reflector, Liminal::class) !== null) {
+                $liminal = true;
+            }
         }
 
         // If we're all the way down here, we have an instance, so we need to
@@ -380,7 +401,7 @@ final class Container implements Contracts\Container
         // and return it.
         if ($shared) {
             /** @var TClass $instance */
-            return $this->storeResolved($instance, $name, $qualifier);
+            return $this->storeResolved($instance, $name, $qualifier, $liminal);
         }
 
         // Otherwise, we just return the instance.
@@ -530,7 +551,8 @@ final class Container implements Contracts\Container
             $this->getAttributeInstance($parameter, Qualifier::class),
             $this->getAttributeInstance($parameter, Resolvable::class, true),
             $parameter->isDefaultValueAvailable(),
-            $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null
+            $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null,
+            $this->getAttributeInstance($parameter, Liminal::class) !== null,
         );
     }
 

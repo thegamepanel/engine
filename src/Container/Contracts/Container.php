@@ -13,20 +13,6 @@ use Engine\Container\Bindings\Binding;
 interface Container
 {
     /**
-     * Register a resolver for the given resolvable.
-     *
-     * @template TResolvable of \Engine\Container\Contracts\Resolvable
-     * @template TResolver of \Engine\Container\Contracts\Resolver<TResolvable>
-     *
-     * @param class-string<TResolvable> $resolvable
-     * @param class-string<TResolver>   $resolver
-     * @param bool                      $default
-     *
-     * @return static
-     */
-    public function registerResolver(string $resolvable, string $resolver, bool $default = false): static;
-
-    /**
      * Get the binding for the given class.
      *
      * @template TAbstract of object
@@ -91,16 +77,15 @@ interface Container
      *
      * @template TClass of object
      *
-     * @param class-string                 $class
-     * @param array<string, mixed>         $arguments
+     * @param class-string<TClass>                       $class
+     * @param array<string, mixed>                       $arguments
+     * @param \Engine\Container\Attributes\Named|null    $name
+     * @param \Engine\Container\Contracts\Qualifier|null $qualifier
+     * @param bool                                       $liminal
      *
-     * @phpstan-param class-string<TClass> $class
-     *
-     * @return object
-     *
-     * @phpstan-return TClass
+     * @return TClass
      */
-    public function resolve(string $class, array $arguments = [], ?Named $name = null, ?Qualifier $qualifier = null): object;
+    public function resolve(string $class, array $arguments = [], ?Named $name = null, ?Qualifier $qualifier = null, bool $liminal = false): object;
 
     /**
      * Invoke a method on the given class/object.
