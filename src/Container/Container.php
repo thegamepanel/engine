@@ -9,6 +9,7 @@ use Engine\Container\Attributes\Named;
 use Engine\Container\Bindings\Binding;
 use Engine\Container\Bindings\BindingRegistry;
 use Engine\Container\Concerns\HelpsWithReflection;
+use Engine\Container\Concerns\ImplementsContainerPSR;
 use Engine\Container\Contracts\Qualifier;
 use Engine\Container\Contracts\Resolvable;
 use Engine\Container\Contracts\Resolver;
@@ -26,7 +27,8 @@ use WeakReference;
  */
 final class Container implements Contracts\Container
 {
-    use HelpsWithReflection;
+    use HelpsWithReflection,
+        ImplementsContainerPSR;
 
     private BindingRegistry $bindings;
 

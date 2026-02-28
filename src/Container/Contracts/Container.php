@@ -4,6 +4,7 @@ namespace Engine\Container\Contracts;
 
 use Engine\Container\Attributes\Named;
 use Engine\Container\Bindings\Binding;
+use Psr\Container\ContainerInterface;
 
 /**
  * Container
