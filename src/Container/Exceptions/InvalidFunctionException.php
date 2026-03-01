@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Engine\Container\Exceptions;
 
-use Psr\Container\ContainerExceptionInterface;
+use Engine\Container\Contracts\ContainerException;
 use RuntimeException;
 use Throwable;
 
-final class InvalidFunctionException extends RuntimeException implements ContainerExceptionInterface
+final class InvalidFunctionException extends RuntimeException implements ContainerException
 {
     public static function make(string $function, ?Throwable $previous = null): self
     {

@@ -7,11 +7,11 @@ use Engine\Container\Concerns\HelpsWithReflection;
 use Engine\Container\Container;
 use Engine\Container\Contracts\Resolver;
 use Engine\Container\Dependency;
+use Engine\Container\Exceptions\DependencyResolutionException;
 use Engine\Container\Exceptions\InvalidClassException;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionUnionType;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -53,9 +53,7 @@ final class GenericResolver implements Resolver
         /** @var ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null $type */
         $type = $dependency->type;
 
-        throw new RuntimeException(sprintf(
-            'Cannot resolve a generic dependency of type "%s"', ($type?->__toString() ?? 'unknown')
-        ));
+        throw DependencyResolutionException::cannotResolve(($type?->__toString() ?? 'unknown'));
     }
 
     /**
@@ -81,9 +79,7 @@ final class GenericResolver implements Resolver
                 return null;
             }
 
-            throw new RuntimeException(sprintf(
-                'Cannot resolve a generic dependency of type "%s"', $type->getName()
-            ));
+            throw DependencyResolutionException::cannotResolve($type->getName());
         }
 
         /** @var TType&object $instance */
@@ -136,13 +132,7 @@ final class GenericResolver implements Resolver
                 return $dependency->default;
             }
 
-            if ($type->allowsNull()) {
-                return null;
-            }
-
-            throw new RuntimeException(sprintf(
-                'Cannot resolve an intersection dependency "%s" without a binding', $type
-            ));
+            throw DependencyResolutionException::intersectionNoBinding($type->__toString());
         }
 
         foreach ($bindings as $binding) {
@@ -180,13 +170,7 @@ final class GenericResolver implements Resolver
             return $dependency->default;
         }
 
-        if ($type->allowsNull()) {
-            return null;
-        }
-
-        throw new RuntimeException(sprintf(
-            'Cannot resolve the intersection dependency "%s"', $type
-        ));
+        throw DependencyResolutionException::intersection($type->__toString());
     }
 
     /**
@@ -230,9 +214,7 @@ final class GenericResolver implements Resolver
                 /** @var TType&object */
                 return $this->resolveIntersectionType($resolvable, $dependency, $container, $arguments);
             } catch (Throwable $e) {
-                throw new RuntimeException(sprintf(
-                    'Cannot resolve the union dependency "%s".', $type
-                ), previous: $e);
+                throw DependencyResolutionException::union($type->__toString(), previous: $e);
             }
         }
 
@@ -245,8 +227,6 @@ final class GenericResolver implements Resolver
             return null;
         }
 
-        throw new RuntimeException(sprintf(
-            'Cannot resolve the union dependency "%s".', $type
-        ));
+        throw DependencyResolutionException::union($type->__toString());
     }
 }

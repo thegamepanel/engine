@@ -9,12 +9,14 @@ use Engine\Container\Attributes\Named;
 use Engine\Container\Bindings\Binding;
 use Engine\Container\Bindings\BindingRegistry;
 use Engine\Container\Concerns\HelpsWithReflection;
-use Engine\Container\Concerns\ImplementsContainerPSR;
 use Engine\Container\Contracts\Qualifier;
 use Engine\Container\Contracts\Resolvable;
 use Engine\Container\Contracts\Resolver;
+use Engine\Container\Exceptions\BindingNotFoundException;
+use Engine\Container\Exceptions\InvalidInvocationException;
+use Engine\Container\Exceptions\InvalidResolverException;
 use Engine\Container\Exceptions\MethodCallException;
-use InvalidArgumentException;
+use Engine\Container\Exceptions\NotInstantiableException;
 use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
@@ -27,8 +29,7 @@ use WeakReference;
  */
 final class Container implements Contracts\Container
 {
-    use HelpsWithReflection,
-        ImplementsContainerPSR;
+    use HelpsWithReflection;
 
     private BindingRegistry $bindings;
 
@@ -58,20 +59,32 @@ final class Container implements Contracts\Container
     private array $qualifiedInstances = [];
 
     /**
-     * @var array<class-string, \WeakReference>
+     * @var array<class-string, \WeakReference<*>>
      */
     private array $liminalInstances = [];
 
     /**
-     * @param \Engine\Container\Bindings\BindingRegistry   $bindings
-     * @param \Engine\Container\Contracts\Resolver<*>|null $defaultResolver
+     * @param \Engine\Container\Bindings\BindingRegistry                                                                                                                                 $bindings
+     * @param array<class-string<\Engine\Container\Contracts\Resolvable>, array{0: class-string<\Engine\Container\Contracts\Resolver<\Engine\Container\Contracts\Resolvable>>, 1: bool}> $resolvers
+     * @param \Engine\Container\Contracts\Resolver<*>|null                                                                                                                               $defaultResolver
      */
     public function __construct(
         BindingRegistry $bindings,
+        array           $resolvers = [],
         ?Resolver       $defaultResolver = null
     )
     {
         $this->bindings = $bindings;
+
+        foreach ($resolvers as $resolvable => [$resolver, $default]) {
+            $this->registerResolver($resolvable, $resolver);
+
+            if ($default && $defaultResolver === null) {
+                /** @var \Engine\Container\Contracts\Resolver<*> $lazy */
+                $lazy            = $this->lazy($resolver);
+                $defaultResolver = $lazy;
+            }
+        }
 
         // If there's a default resolver provided, set it.
         if ($defaultResolver !== null) {
@@ -111,13 +124,13 @@ final class Container implements Contracts\Container
         // resolvable contract.
         /** @phpstan-ignore function.alreadyNarrowedType */
         if (! is_subclass_of($resolvable, Resolvable::class)) {
-            throw new InvalidArgumentException(sprintf('"%s" is not a resolvable.', $resolvable));
+            throw InvalidResolverException::resolvable($resolvable);
         }
 
         // Same for the resolver.
         /** @phpstan-ignore function.alreadyNarrowedType */
         if (! is_subclass_of($resolver, Resolver::class)) {
-            throw new InvalidArgumentException(sprintf('"%s" is not a resolver.', $resolver));
+            throw InvalidResolverException::resolver($resolver);
         }
 
         // Create a lazy object, so that its only initialised when needed.
@@ -146,7 +159,7 @@ final class Container implements Contracts\Container
                 return null;
             }
 
-            throw new InvalidArgumentException(sprintf('No binding found for %s.', $class));
+            throw BindingNotFoundException::class($class);
         }
 
         // If It's named, we'll try and grab that sub-binding.
@@ -155,7 +168,7 @@ final class Container implements Contracts\Container
 
             // If we can't find one, error.
             if ($binding === null) {
-                throw new InvalidArgumentException(sprintf('No binding found for %s with name %s.', $class, $name->name));
+                throw BindingNotFoundException::named($class, $name->name);
             }
 
             return $binding;
@@ -167,7 +180,7 @@ final class Container implements Contracts\Container
 
             // And again.
             if ($binding === null) {
-                throw new InvalidArgumentException(sprintf('No binding found for %s qualified by %s.', $class, $qualifier::class));
+                throw BindingNotFoundException::qualified($class, $qualifier::class);
             }
 
             return $binding;
@@ -220,6 +233,7 @@ final class Container implements Contracts\Container
         $trueClass = $this->getTrueClass($class, $name, $qualifier);
 
         if (isset($this->liminalInstances[$trueClass]) && $this->liminalInstances[$trueClass]->get() !== null) {
+            /** @var TClass */
             return $this->liminalInstances[$trueClass]->get();
         }
 
@@ -256,7 +270,7 @@ final class Container implements Contracts\Container
         if ($liminal) {
             $this->liminalInstances[$trueClass] = WeakReference::create($instance);
 
-            return $this;
+            return $instance;
         }
 
         if ($name !== null) {
@@ -294,7 +308,7 @@ final class Container implements Contracts\Container
         if ($resolver === null) {
             // But if no default one has been set, it's an error.
             if (! isset($this->defaultResolver)) {
-                throw new InvalidArgumentException('No default resolver has been set.');
+                throw InvalidResolverException::noDefault();
             }
 
             $resolver = $this->defaultResolver;
@@ -322,7 +336,7 @@ final class Container implements Contracts\Container
 
         /** @var TClass $instance */
         $instance = $this->getClassReflector($trueClass)
-                         ->newLazyProxy(function (object $proxy) use ($trueClass): object {
+                         ->newLazyProxy(function () use ($trueClass): object {
                              return $this->resolve($trueClass);
                          });
 
@@ -384,7 +398,7 @@ final class Container implements Contracts\Container
             $reflector = $this->getClassReflector($trueClass);
 
             if ($reflector->isInstantiable() === false) {
-                throw new InvalidArgumentException(sprintf('Class %s is not instantiable.', $trueClass));
+                throw NotInstantiableException::make($trueClass);
             }
 
             if ($reflector->hasMethod('__construct') === false) {
@@ -434,20 +448,14 @@ final class Container implements Contracts\Container
 
         // We can't call the method if it isn't public.
         if ($reflectedMethod->isPublic() === false) {
-            throw new InvalidArgumentException(
-                sprintf('Method %s::%s is not public.',
-                    $trueClass, $method
-                ));
+            throw InvalidInvocationException::notPublic($trueClass, $method);
         }
 
         // If we have an object, and the method is the constructor, we can
         // only call it if the object is an uninitialised lazy object, created
         // using the ghost or proxy methods.
         if (is_object($class) && $reflectedMethod->isConstructor() && $reflector->isUninitializedLazyObject($class) === false) {
-            throw new InvalidArgumentException(
-                sprintf('Cannot call constructor of %s because it is already initialised.',
-                    $reflector->getName()
-                ));
+            throw InvalidInvocationException::alreadyInitialised($reflector->getName());
         }
 
         $dependencies = $this->collectDependencies($reflectedMethod, $arguments);
@@ -472,8 +480,11 @@ final class Container implements Contracts\Container
             // For everything else, just invoke. This will catch methods called
             // on objects, including uninitialised lazy objects.
             return $reflectedMethod->invokeArgs($class, $dependencies);
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException $e) { // @codeCoverageIgnoreStart
+            // Unreachable — the method was already successfully reflected above,
+            // so invokeArgs() cannot throw a ReflectionException.
             throw MethodCallException::make($reflector->getName(), $method, $e);
+            // @codeCoverageIgnoreEnd
         }
     }
 

@@ -7,7 +7,7 @@ use Engine\Container\Concerns\HelpsWithReflection;
 use Engine\Container\Container;
 use Engine\Container\Contracts\Resolver;
 use Engine\Container\Dependency;
-use RuntimeException;
+use Engine\Container\Exceptions\DependencyResolutionException;
 
 /**
  * @implements \Engine\Container\Contracts\Resolver<\Engine\Container\Attributes\Ghost>
@@ -33,7 +33,7 @@ final class GhostResolver implements Resolver
         $class = $this->getTypeClassName($dependency);
 
         if ($class === null || (! class_exists($class) && ! interface_exists($class))) {
-            throw new RuntimeException('Cannot create a ghost object for a non-class');
+            throw DependencyResolutionException::ghost($class ?? 'null');
         }
 
         /**

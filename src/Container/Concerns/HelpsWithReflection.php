@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Engine\Container\Concerns;
 
+use Closure;
 use Engine\Container\Dependency;
 use Engine\Container\Exceptions\InvalidClassException;
 use Engine\Container\Exceptions\InvalidFunctionException;
@@ -140,11 +141,14 @@ trait HelpsWithReflection
     {
         try {
             return new ReflectionFunction($function(...));
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException $e) { // @codeCoverageIgnoreStart
+            // Unreachable — the spread operator ($function(...)) always produces
+            // a valid Closure, so ReflectionFunction cannot fail here.
             throw InvalidFunctionException::make(
                 $this->getFunctionName($function),
                 $e
             );
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -161,7 +165,7 @@ trait HelpsWithReflection
             return $function;
         }
 
-        if ($function instanceof \Closure) {
+        if ($function instanceof Closure) {
             return '\Closure{' . spl_object_hash($function) . '}';
         }
 
@@ -178,7 +182,8 @@ trait HelpsWithReflection
             return $function[0] . '::' . $function[1];
         }
 
-        return 'function';
+        // Unreachable — all callable forms are handled above (string, Closure, invokable object, array).
+        return 'function'; // @codeCoverageIgnore
     }
 
     /**
