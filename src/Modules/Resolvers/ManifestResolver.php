@@ -7,10 +7,10 @@ use Engine\Container\Container;
 use Engine\Container\Contracts\Resolver;
 use Engine\Container\Dependency;
 use Engine\Modules\Attributes\Manifest;
+use Engine\Modules\Exceptions\ModuleResolutionException;
 use Engine\Modules\ModuleManifest;
 use Engine\Modules\ModuleRegistry;
 use ReflectionNamedType;
-use RuntimeException;
 
 /**
  * @implements \Engine\Container\Contracts\Resolver<\Engine\Modules\Attributes\Manifest>
@@ -43,14 +43,14 @@ final class ManifestResolver implements Resolver
         $manifest = $dependency->resolvable;
 
         if (! $manifest instanceof Manifest) {
-            throw new RuntimeException('Module manifest resolver can only resolver for the manifest attribute');
+            throw ModuleResolutionException::manifestResolver();
         }
 
         if (
             ! $dependency->type instanceof ReflectionNamedType
             || $dependency->type->getName() !== ModuleManifest::class
         ) {
-            throw new RuntimeException('Module manifest resolver can only resolve for ModuleManifest type');
+            throw ModuleResolutionException::notManifestType();
         }
 
         $instance = $this->registry->manifest($manifest->ident);
@@ -60,9 +60,7 @@ final class ManifestResolver implements Resolver
                 return null;
             }
 
-            throw new RuntimeException(sprintf(
-                'Cannot resolve the module manifest "%s".', $manifest->ident
-            ));
+            throw ModuleResolutionException::unresolvableManifest($manifest->ident);
         }
 
         return $instance;

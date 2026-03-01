@@ -7,10 +7,10 @@ use Engine\Container\Container;
 use Engine\Container\Contracts\Resolver;
 use Engine\Container\Dependency;
 use Engine\Modules\Attributes\Registrar;
+use Engine\Modules\Exceptions\ModuleResolutionException;
 use Engine\Modules\ModuleRegistrar;
 use Engine\Modules\ModuleRegistry;
 use ReflectionNamedType;
-use RuntimeException;
 
 /**
  * @implements \Engine\Container\Contracts\Resolver<\Engine\Modules\Attributes\Registrar>
@@ -43,14 +43,14 @@ final class RegistrarResolver implements Resolver
         $registrar = $dependency->resolvable;
 
         if (! $registrar instanceof Registrar) {
-            throw new RuntimeException('Module registrar resolver can only resolver for the registrar attribute');
+            throw ModuleResolutionException::registrarResolver();
         }
 
         if (
             ! $dependency->type instanceof ReflectionNamedType
             || $dependency->type->getName() !== ModuleRegistrar::class
         ) {
-            throw new RuntimeException('Module registrar resolver can only resolve for ModuleRegistrar type');
+            throw ModuleResolutionException::notRegistrarType();
         }
 
         /** @var \Engine\Modules\ModuleRegistrar<*>|null $instance */
@@ -61,9 +61,7 @@ final class RegistrarResolver implements Resolver
                 return null;
             }
 
-            throw new RuntimeException(sprintf(
-                'Cannot resolve the module registrar "%s".', $registrar->ident
-            ));
+            throw ModuleResolutionException::unresolvableRegistrar($registrar->ident);
         }
 
         return $instance;

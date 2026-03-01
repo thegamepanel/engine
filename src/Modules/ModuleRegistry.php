@@ -3,26 +3,26 @@ declare(strict_types=1);
 
 namespace Engine\Modules;
 
-final class ModuleRegistry
+final readonly class ModuleRegistry
 {
     /**
      * @var array<string, \Engine\Modules\ModuleManifest>
      */
-    private readonly array $modules;
+    public readonly array $modules;
 
     /**
      * @var array<string>
      */
-    private readonly array $coreModules;
+    public readonly array $coreModules;
 
     /**
-     * @var array<string, \Engine\Modules\ModuleRegistrar>
+     * @var array<string, \Engine\Modules\ModuleRegistrar<*>>
      */
     private readonly array $registrars;
 
     /**
-     * @param array<string, \Engine\Modules\ModuleManifest>  $modules
-     * @param array<string, \Engine\Modules\ModuleRegistrar> $registrars
+     * @param array<string, \Engine\Modules\ModuleManifest>     $modules
+     * @param array<string, \Engine\Modules\ModuleRegistrar<*>> $registrars
      */
     public function __construct(
         array $modules,
@@ -37,7 +37,7 @@ final class ModuleRegistry
     }
 
     /**
-     * Get a modules manifest.
+     * Get a modules' manifest.
      *
      * @param string $name
      *
@@ -49,11 +49,11 @@ final class ModuleRegistry
     }
 
     /**
-     * Get a modules registrar.
+     * Get a modules' registrar.
      *
      * @param string $name
      *
-     * @return \Engine\Modules\ModuleRegistrar|null
+     * @return \Engine\Modules\ModuleRegistrar<*>|null
      */
     public function registrar(string $name): ?ModuleRegistrar
     {
