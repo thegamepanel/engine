@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Engine\Core;
 
-use;
 use Engine\Container\Bindings\BindingBuilder;
 
 final class EngineBuilder
@@ -14,7 +13,7 @@ final class EngineBuilder
     public readonly string $scope;
 
     /**
-     * @var BindingBuilder
+     * @var array<class-string, array<\Engine\Container\Bindings\BindingBuilder<*>>>
      */
     private(set) array $bindings = [];
 
@@ -26,7 +25,7 @@ final class EngineBuilder
     private(set) ?string $defaultResolver = null;
 
     /**
-     * @var array<class-string<\Engine\Collectors\Contracts\CollectorHandler>>
+     * @var array<class-string<\Engine\Collectors\Contracts\CollectorHandler<*>>>
      */
     private(set) array $collectors = [];
 
@@ -74,7 +73,7 @@ final class EngineBuilder
     /**
      * Register a custom collector.
      *
-     * @param class-string<\Engine\Collectors\Contracts\CollectorHandler> $collector
+     * @param class-string<\Engine\Collectors\Contracts\CollectorHandler<*>> $collector
      *
      * @return $this
      */
