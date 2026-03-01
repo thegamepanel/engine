@@ -11,6 +11,16 @@ use PDOException;
 final class ConnectionFactory
 {
     /**
+     * @var array<int, int|bool>
+     */
+    private static array $defaultOptions = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::ATTR_STRINGIFY_FETCHES  => false,
+    ];
+
+    /**
      * @var array<string, \Engine\Database\Connection>
      */
     private array $connections;
@@ -20,12 +30,24 @@ final class ConnectionFactory
      */
     private array $config;
 
+    public readonly string $default;
+
+    public readonly bool $persistent;
+
     /**
-     * @param array<string, \Engine\Database\ConnectionConfig> $config
+     * @param array<string, \Engine\Database\ConnectionConfig> $connectionConfig
+     * @param string                                           $defaultConnection
+     * @param bool                                             $persistentConnections
      */
-    public function __construct(array $config)
+    public function __construct(
+        array  $connectionConfig,
+        string $defaultConnection,
+        bool   $persistentConnections = true
+    )
     {
-        $this->config = $config;
+        $this->config     = $connectionConfig;
+        $this->default    = $defaultConnection;
+        $this->persistent = $persistentConnections;
     }
 
     /**
@@ -33,8 +55,10 @@ final class ConnectionFactory
      *
      * @return \Engine\Database\Connection
      */
-    public function make(string $name): Connection
+    public function make(?string $name = null): Connection
     {
+        $name ??= $this->default;
+
         if (isset($this->connections[$name])) {
             return $this->connections[$name];
         }
@@ -67,6 +91,11 @@ final class ConnectionFactory
      */
     private function makePdoForConfig(ConnectionConfig $config): PDO
     {
+        $options = array_merge(
+            self::$defaultOptions,
+            $config->options
+        );
+
         return new PDO(match ($config->driver) {
             'mysql' => $this->makeMysqlDsn($config),
             'pgsql' => $this->makePgsqlDsn($config),
@@ -76,7 +105,7 @@ final class ConnectionFactory
                     $config->driver
                 )
             )
-        });
+        }, $config->username, $config->password, $options);
     }
 
     private function makeMysqlDsn(ConnectionConfig $config): string

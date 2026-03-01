@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Engine\Database;
 
-use Generator;
 use PDO;
 use PDOStatement;
 

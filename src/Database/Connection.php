@@ -5,6 +5,7 @@ namespace Engine\Database;
 
 use Engine\Database\Exceptions\DatabaseException;
 use Engine\Database\Exceptions\QueryException;
+use Engine\Database\Query\Contracts\Expression;
 use JetBrains\PhpStorm\Language;
 use PDO;
 use PDOException;
@@ -52,26 +53,36 @@ final class Connection
     /**
      * Execute a query against the database and return the result.
      *
-     * @param string                   $query
-     * @param array<int|string, mixed> $bindings
+     * @param string|\Engine\Database\Query\Contracts\Expression $query
+     * @param array<int|string, mixed>                            $bindings
      *
      * @return \Engine\Database\Result
      */
-    public function query(#[Language('GenericSQL')] string $query, array $bindings = []): Result
+    public function query(#[Language('GenericSQL')] string|Expression $query, array $bindings = []): Result
     {
+        if ($query instanceof Expression) {
+            $bindings = $query->getBindings();
+            $query    = $query->toSql();
+        }
+
         return new Result($this->statement($query, $bindings), $bindings);
     }
 
     /**
      * Execute a query against the database and return the number of affected rows.
      *
-     * @param string                   $query
-     * @param array<int|string, mixed> $bindings
+     * @param string|\Engine\Database\Query\Contracts\Expression $query
+     * @param array<int|string, mixed>                            $bindings
      *
      * @return \Engine\Database\WriteResult
      */
-    public function execute(#[Language('GenericSQL')] string $query, array $bindings = []): WriteResult
+    public function execute(#[Language('GenericSQL')] string|Expression $query, array $bindings = []): WriteResult
     {
+        if ($query instanceof Expression) {
+            $bindings = $query->getBindings();
+            $query    = $query->toSql();
+        }
+
         try {
             return new WriteResult(
                 affectedRows: $this->statement($query, $bindings)->rowCount(),
@@ -85,13 +96,18 @@ final class Connection
     /**
      * Execute a query against the database and return the result as a cursor.
      *
-     * @param string                   $query
-     * @param array<int|string, mixed> $bindings
+     * @param string|\Engine\Database\Query\Contracts\Expression $query
+     * @param array<int|string, mixed>                            $bindings
      *
      * @return \Engine\Database\Cursor
      */
-    public function stream(#[Language('GenericSQL')] string $query, array $bindings = []): Cursor
+    public function stream(#[Language('GenericSQL')] string|Expression $query, array $bindings = []): Cursor
     {
+        if ($query instanceof Expression) {
+            $bindings = $query->getBindings();
+            $query    = $query->toSql();
+        }
+
         return new Cursor($this->statement($query, $bindings), $bindings);
     }
 

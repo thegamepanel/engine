@@ -15,14 +15,14 @@ final readonly class ConnectionConfig
      * @param array<mixed> $options
      */
     public function __construct(
-        public string $driver,
+        public string  $driver,
         public ?string $host,
         public ?int    $port,
         public ?string $socket,
-        public string $database,
-        public string $username,
-        public string $password,
-        public array  $options = [],
+        public string  $database,
+        public string  $username,
+        public string  $password,
+        public array   $options = [],
     )
     {
     }

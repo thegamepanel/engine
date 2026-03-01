@@ -3,8 +3,12 @@ declare(strict_types=1);
 
 namespace Engine\Database;
 
+use Engine\Values\Concerns\GetValueAsType;
+
 final readonly class Row
 {
+    use GetValueAsType;
+
     /**
      * @var array<string, mixed>
      */
@@ -34,5 +38,10 @@ final readonly class Row
     public function toArray(): array
     {
         return $this->data;
+    }
+
+    protected function getValue(string $name): mixed
+    {
+        return $this->get($name);
     }
 }
