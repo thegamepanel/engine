@@ -23,4 +23,9 @@ final class BindingRegistry
     {
         return $this->bindings[$abstract][] = new BindingBuilder($abstract);
     }
+
+    public function catalogue(): BindingCatalogue
+    {
+
+    }
 }
