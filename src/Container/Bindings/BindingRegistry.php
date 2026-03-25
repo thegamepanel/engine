@@ -11,6 +11,16 @@ final class BindingRegistry
     private(set) array $bindings = [];
 
     /**
+     * @var string
+     */
+    private(set) string $scope;
+
+    public function __construct(string $scope)
+    {
+        $this->scope = $scope;
+    }
+
+    /**
      * Create and register a new binding builder.
      *
      * @template TAbstract of object
@@ -21,11 +31,6 @@ final class BindingRegistry
      */
     public function bind(string $abstract): BindingBuilder
     {
-        return $this->bindings[$abstract][] = new BindingBuilder($abstract);
-    }
-
-    public function catalogue(): BindingCatalogue
-    {
-
+        return $this->bindings[$abstract][] = new BindingBuilder($this->scope, $abstract);
     }
 }
