@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Engine\Container\Bindings;
 
+use Engine\Container\Attributes\Named;
+use Engine\Container\Contracts\Qualifier;
+
 final readonly class BindingCatalogue
 {
     /**
@@ -40,5 +43,50 @@ final readonly class BindingCatalogue
         $this->bindings = $bindings;
         $this->aliases  = $aliases;
         $this->scoped   = $scoped;
+    }
+
+    /**
+     * @template TClass of object
+     *
+     * @param class-string<TClass>                       $class
+     * @param \Engine\Container\Attributes\Named|null    $named
+     * @param \Engine\Container\Contracts\Qualifier|null $qualifier
+     *
+     * @return \Engine\Container\Bindings\Binding<TClass>|null
+     */
+    public function get(string $class, ?Named $named = null, ?Qualifier $qualifier = null): ?Binding
+    {
+        $class = $this->resolveAlias($class);
+
+        /** @var \Engine\Container\Bindings\Binding<TClass>|null $binding */
+        $binding = $this->bindings[$class] ?? null;
+
+        if ($binding === null) {
+            return null;
+        }
+
+        if ($named !== null) {
+            return $binding->namedMap[$named->name] ?? null;
+        }
+
+        if ($qualifier !== null) {
+            return $binding->qualifiedMap[$qualifier::class] ?? null;
+        }
+
+        return $binding;
+    }
+
+    /**
+     * @template TClass of object
+     *
+     * @param class-string<TClass> $class
+     *
+     * @return class-string<TClass>
+     */
+    private function resolveAlias(string $class): string
+    {
+        /** @noinspection ProperNullCoalescingOperatorUsageInspection */
+        /** @var class-string<TClass> */
+        return $this->aliases[$class] ?? $class;
     }
 }

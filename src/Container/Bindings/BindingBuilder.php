@@ -18,6 +18,13 @@ use Closure;
 final class BindingBuilder
 {
     /**
+     * The module scope of the binding.
+     *
+     * @var string
+     */
+    public readonly string $scope;
+
+    /**
      * The main class being bound.
      *
      * @var class-string<TAbstract>
@@ -88,10 +95,12 @@ final class BindingBuilder
     private(set) bool $shared = true;
 
     /**
+     * @param string                  $scope
      * @param class-string<TAbstract> $abstract
      */
-    public function __construct(string $abstract)
+    public function __construct(string $scope, string $abstract)
     {
+        $this->scope    = $scope;
         $this->abstract = $abstract;
     }
 
