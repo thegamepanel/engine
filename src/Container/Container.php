@@ -6,6 +6,7 @@ namespace Engine\Container;
 use Engine\Container\Attributes\Lazy;
 use Engine\Container\Attributes\Liminal;
 use Engine\Container\Attributes\Named;
+use Engine\Container\Attributes\NoResolution;
 use Engine\Container\Bindings\BindingCatalogue;
 use Engine\Container\Contracts\Qualifier;
 use Engine\Container\Contracts\Resolvable;
@@ -13,6 +14,7 @@ use Engine\Container\Contracts\Resolver;
 use Engine\Container\Exceptions\InvalidInvocationException;
 use Engine\Container\Exceptions\MethodCallException;
 use Engine\Container\Exceptions\NotInstantiableException;
+use Engine\Container\Exceptions\UnresolvableClassException;
 use Engine\Container\Resolvers\ResolverCatalogue;
 use ReflectionException;
 use ReflectionFunctionAbstract;
@@ -211,6 +213,12 @@ final class Container
         // If we still don't have an instance, we need to create one ourselves.
         if ($instance === null) {
             $reflector = ReflectionHelper::getClassReflector($resolvingClass);
+
+            // If we're here, and it has the 'no resolution' attribute, we can't
+            // automatically resolve it, so it's an exception.
+            if (ReflectionHelper::getAttributeInstance($reflector, NoResolution::class) !== null) {
+                throw UnresolvableClassException::make($resolvingClass);
+            }
 
             // If it has the lazy attribute, it needs a lazy resolution.
             if ($skipLazy === false && ReflectionHelper::getAttributeInstance($reflector, Lazy::class) !== null) {
