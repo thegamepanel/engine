@@ -7,7 +7,7 @@ use Attribute;
 use Engine\Container\Contracts\Resolvable;
 
 #[Attribute(Attribute::TARGET_PARAMETER | Attribute::TARGET_CLASS)]
-final readonly class Liminal implements Resolvable
+final readonly class NoResolution implements Resolvable
 {
 
 }
