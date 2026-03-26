@@ -11,7 +11,7 @@ final class ResolverRegistry
     private(set) ?string $default;
 
     /**
-     * @var array<class-string<\Engine\Container\Contracts\Resolvable>, \Engine\Container\Contracts\Resolver<*>>
+     * @var array<class-string<\Engine\Container\Contracts\Resolvable>, class-string<\Engine\Container\Contracts\Resolver<*>>>
      */
     private(set) array $resolvers = [];
 
