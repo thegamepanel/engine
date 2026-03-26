@@ -167,7 +167,7 @@ final readonly class Binding
     /**
      * @return bool
      *
-     * @phpstan-assert-if-true TAbstract $instance
+     * @phpstan-assert-if-true TAbstract $this->instance
      */
     public function isBoundToInstance(): bool
     {
