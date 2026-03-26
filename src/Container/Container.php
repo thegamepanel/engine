@@ -19,17 +19,14 @@ use ReflectionParameter;
 use RuntimeException;
 use WeakReference;
 
-/**
- * @template TDefaultResolver of \Engine\Container\Contracts\Resolver<null>
- */
 final class Container
 {
     /**
-     * @var \Engine\Container\Resolvers\ResolverCatalogue<TDefaultResolver>
+     * @var \Engine\Container\Resolvers\ResolverCatalogue
      */
     private ResolverCatalogue $resolvers;
 
-    private BindingCatalogue $bindings;
+    private(set) BindingCatalogue $bindings;
 
     /**
      * @var array<class-string, object>
@@ -52,8 +49,8 @@ final class Container
     private array $qualifiedInstances = [];
 
     /**
-     * @param \Engine\Container\Resolvers\ResolverCatalogue<TDefaultResolver> $resolvers
-     * @param \Engine\Container\Bindings\BindingCatalogue                     $bindings
+     * @param \Engine\Container\Resolvers\ResolverCatalogue $resolvers
+     * @param \Engine\Container\Bindings\BindingCatalogue   $bindings
      */
     public function __construct(
         ResolverCatalogue $resolvers,

@@ -163,4 +163,24 @@ final readonly class Binding
         $this->lazily       = $lazily;
         $this->shared       = $shared;
     }
+
+    /**
+     * @return bool
+     *
+     * @phpstan-assert-if-true TAbstract $instance
+     */
+    public function isBoundToInstance(): bool
+    {
+        return $this->instance !== null;
+    }
+
+    /**
+     * @return bool
+     *
+     * @phpstan-assert-if-true \Closure(): TAbstract $this->factory
+     */
+    public function hasFactory(): bool
+    {
+        return $this->factory !== null;
+    }
 }

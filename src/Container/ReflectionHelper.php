@@ -38,7 +38,7 @@ final readonly class ReflectionHelper
      *
      * @phpstan-assert-if-true ReflectionIntersectionType $dependency->type
      */
-    public static function isIntersection(Dependency $dependency): bool
+    public static function isIntersectionType(Dependency $dependency): bool
     {
         return $dependency->type instanceof ReflectionIntersectionType;
     }
