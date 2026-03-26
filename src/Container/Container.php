@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Engine\Container;
 
+use Engine\Container\Attributes\Lazy;
 use Engine\Container\Attributes\Liminal;
 use Engine\Container\Attributes\Named;
 use Engine\Container\Bindings\BindingCatalogue;
@@ -122,7 +123,7 @@ final class Container
     {
         return ReflectionHelper::getLazyProxy(
             $resolution->class,
-            fn () => $this->resolve($resolution),
+            fn () => $this->resolve($resolution, true),
         );
     }
 
@@ -165,10 +166,11 @@ final class Container
      * @template TClass of object
      *
      * @param \Engine\Container\Resolution<TClass> $resolution
+     * @param bool                                 $skipLazy
      *
      * @return TClass
      */
-    public function resolve(Resolution $resolution): object
+    public function resolve(Resolution $resolution, bool $skipLazy = false): object
     {
         // If it has already been resolved, return it.
         $instance = $this->getResolved($resolution);
@@ -179,7 +181,7 @@ final class Container
 
         // If it should be resolved lazily, return a lazy proxy, deferring the
         // resolution until needed.
-        if ($resolution->shouldResolveLazily()) {
+        if ($skipLazy === false && $resolution->shouldResolveLazily()) {
             return $this->lazy($resolution);
         }
 
@@ -209,6 +211,11 @@ final class Container
         // If we still don't have an instance, we need to create one ourselves.
         if ($instance === null) {
             $reflector = ReflectionHelper::getClassReflector($resolvingClass);
+
+            // If it has the lazy attribute, it needs a lazy resolution.
+            if ($skipLazy === false && ReflectionHelper::getAttributeInstance($reflector, Lazy::class) !== null) {
+                return $this->lazy($resolution);
+            }
 
             // We first need to make sure the class is instantiable.
             if ($reflector->isInstantiable() === false) {
