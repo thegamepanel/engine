@@ -58,12 +58,12 @@ final readonly class BindingCatalogue
     {
         $class = $this->resolveAlias($class);
 
-        /** @var \Engine\Container\Bindings\Binding<TClass>|null $binding */
-        $binding = $this->bindings[$class] ?? null;
-
-        if ($binding === null) {
+        if (! isset($this->bindings[$class])) {
             return null;
         }
+
+        /** @var \Engine\Container\Bindings\Binding<TClass> $binding */
+        $binding = $this->bindings[$class];
 
         if ($named !== null) {
             return $binding->namedMap[$named->name] ?? null;

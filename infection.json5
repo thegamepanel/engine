@@ -1,0 +1,35 @@
+{
+  "$schema" : "vendor/infection/infection/resources/schema.json",
+  "source"  : {
+    "directories": [
+      "src"
+    ]
+  },
+  "logs"    : {
+    "text": "build/infection.txt",
+    "html": "build/infection.html"
+  },
+  "mutators": {
+    "@default"     : true,
+    "TrueValue"    : {
+      "ignore": [
+        "Engine\\Container\\Container::lazy"
+      ]
+    },
+    "FalseValue"   : {
+      "ignore": [
+        "Engine\\Container\\Container::resolve"
+      ]
+    },
+    "ReturnRemoval": {
+      "ignore": [
+        "Engine\\Container\\Container::invokeClassMethod"
+      ]
+    },
+    "IfNegation": {
+      "ignore": [
+        "Engine\\Container\\Container::invokeClassMethod"
+      ]
+    }
+  }
+}

@@ -8,7 +8,7 @@ final class ResolverRegistry
     /**
      * @var class-string<\Engine\Container\Contracts\Resolver<null>>|null
      */
-    private(set) ?string $default;
+    private(set) ?string $default = null;
 
     /**
      * @var array<class-string<\Engine\Container\Contracts\Resolvable>, class-string<\Engine\Container\Contracts\Resolver<*>>>
