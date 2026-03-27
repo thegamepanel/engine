@@ -57,7 +57,7 @@ final class BindingBuilder
      *
      * @var (\Closure(): TAbstract)|null
      */
-    private(set) Closure|null $factory;
+    private(set) Closure|null $factory = null;
 
     /**
      * The name to identify this binding by.

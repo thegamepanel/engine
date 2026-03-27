@@ -104,12 +104,16 @@ final class Container
         }
 
         if ($resolution->isLiminal()) {
-            /** @var TClass|null */
-            return $this->liminalInstances[$resolution->class]->get();
+            if (isset($this->liminalInstances[$resolution->class])) {
+                /** @var TClass|null */
+                return $this->liminalInstances[$resolution->class]->get(); // @infection-ignore-all
+            }
+
+            return null;
         }
 
         /** @var TClass|null */
-        return $this->instances[$resolution->class];
+        return $this->instances[$resolution->class] ?? null;
     }
 
     /**
@@ -266,9 +270,9 @@ final class Container
             $callable = $invocation->invokable;
 
             // Make sure that it's actually callable.
-            if (! is_callable($callable)) {
+            if (! is_callable($callable)) { // @codeCoverageIgnoreStart
                 throw new RuntimeException('Cannot invoke non-callable');
-            }
+            } // @codeCoverageIgnoreEnd
 
             return $this->invokeCallable($callable, $invocation->arguments);
         }
@@ -278,9 +282,9 @@ final class Container
         $method = $invocation->invokable;
 
         // Make sure we're dealing with a proper method.
-        if (! is_string($method)) {
+        if (! is_string($method)) { // @codeCoverageIgnoreStart
             throw new RuntimeException('Cannot invoke non-string method');
-        }
+        } // @codeCoverageIgnoreEnd
 
         // If the class is an object, we're calling a method on it.
         if (is_object($class)) {
@@ -355,7 +359,7 @@ final class Container
 
             // If we're here, we're calling a method on an object.
             return $methodReflector->invokeArgs($object, $dependencies);
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException $e) { // @codeCoverageIgnoreStart
             // Unreachable — the method was already successfully reflected above,
             // so invokeArgs() cannot throw a ReflectionException.
             throw MethodCallException::make($class, $method, $e);

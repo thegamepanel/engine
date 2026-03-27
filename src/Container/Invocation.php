@@ -75,4 +75,19 @@ final class Invocation
 
         return $this;
     }
+
+    /**
+     * @return bool
+     *
+     * @phpstan-assert-if-true callable $this->invokable
+     */
+    public function isCallable(): bool
+    {
+        return is_callable($this->invokable);
+    }
+
+    public function isClassMethodCall(): bool
+    {
+        return $this->class !== null && is_string($this->invokable);
+    }
 }

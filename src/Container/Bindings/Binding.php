@@ -34,18 +34,20 @@ final readonly class Binding
         array          $qualifiedBindings = [],
     ): self
     {
-        // If there's no concrete, use the instance if it's set, otherwise null.
-        $concrete = $builder->concrete ?? ($builder->instance ? $builder->instance::class : null);
+        $concrete = $builder->concrete;
+        $aliases  = $builder->aliases;
 
-        /**
-         * Ensure that the concrete is also an alias.
-         * @var array<class-string<TAbstract>> $aliases
-         */
-        $aliases = array_merge([$concrete], $builder->aliases);
+        if ($builder->concrete) {
+            /**
+             * Ensure that the concrete is also an alias.
+             * @var array<class-string<TAbstract>> $aliases
+             */
+            $aliases = array_merge([$concrete], $aliases);
+        }
 
         return new self(
             $builder->abstract,
-            $concrete,
+            $builder->concrete,
             $builder->instance,
             $aliases,
             $builder->factory,
