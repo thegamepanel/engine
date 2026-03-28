@@ -13,7 +13,7 @@ final class InvalidClassException extends RuntimeException implements ContainerE
     {
         return new self(sprintf(
             'The provided class %s is not a valid class.',
-            $class
+            $class,
         ), previous: $previous);
     }
 }

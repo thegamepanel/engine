@@ -11,7 +11,7 @@ final class InvalidInvocationException extends InvalidArgumentException implemen
     public static function notPublic(string $class, string $method): self
     {
         return new self(
-            sprintf('Method %s::%s is not public.', $class, $method)
+            sprintf('Method %s::%s is not public.', $class, $method),
         );
     }
 

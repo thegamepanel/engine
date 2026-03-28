@@ -24,27 +24,26 @@ use ReflectionUnionType;
 final readonly class Dependency
 {
     /**
-     * @param string                                                                     $parameter
-     * @param \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type
-     * @param bool                                                                       $optional
-     * @param \Engine\Container\Attributes\Named|null                                    $name
-     * @param TQualifier                                                                 $qualifier
-     * @param TResolvable                                                                $resolvable
-     * @param bool                                                                       $hasDefault
-     * @param TType|null                                                                 $default
-     * @param bool                                                                       $liminal
+     * @param string                                                                  $parameter
+     * @param ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null $type
+     * @param bool                                                                    $optional
+     * @param Named|null                                                              $name
+     * @param TQualifier                                                              $qualifier
+     * @param TResolvable                                                             $resolvable
+     * @param bool                                                                    $hasDefault
+     * @param TType|null                                                              $default
+     * @param bool                                                                    $liminal
      */
     public function __construct(
         public string                                                                  $parameter,
-        public ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null $type,
+        public ReflectionIntersectionType|ReflectionNamedType|ReflectionUnionType|null $type,
         public bool                                                                    $optional = false,
         public ?Named                                                                  $name = null,
         public ?Qualifier                                                              $qualifier = null,
         public ?Resolvable                                                             $resolvable = null,
         public bool                                                                    $hasDefault = false,
         public mixed                                                                   $default = null,
-        public bool                                                                    $liminal = false
-    )
-    {
+        public bool                                                                    $liminal = false,
+    ) {
     }
 }

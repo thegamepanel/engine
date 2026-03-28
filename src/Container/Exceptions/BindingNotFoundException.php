@@ -11,21 +11,21 @@ final class BindingNotFoundException extends RuntimeException implements Contain
     public static function class(string $class): self
     {
         return new self(
-            sprintf('No binding found for %s', $class)
+            sprintf('No binding found for %s', $class),
         );
     }
 
     public static function named(string $class, string $name): self
     {
         return new self(
-            sprintf('No binding found for %s with name %s', $class, $name)
+            sprintf('No binding found for %s with name %s', $class, $name),
         );
     }
 
     public static function qualified(string $class, string $qualifier): self
     {
         return new self(
-            sprintf('No binding found for %s qualified by %s', $class, $qualifier)
+            sprintf('No binding found for %s qualified by %s', $class, $qualifier),
         );
     }
 }

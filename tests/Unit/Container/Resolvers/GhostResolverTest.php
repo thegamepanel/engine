@@ -26,44 +26,6 @@ use Tests\Unit\Container\Fixtures\ConcreteClass;
 class GhostResolverTest extends TestCase
 {
     // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function buildContainer(Binding ...$bindings): Container
-    {
-        $map = [];
-
-        foreach ($bindings as $binding) {
-            $map[$binding->abstract] = $binding;
-        }
-
-        return new Container(
-            new ResolverCatalogue([], GenericResolver::class),
-            new BindingCatalogue($map, [], []),
-        );
-    }
-
-    private function dependencyFrom(string $class, string $paramName): Dependency
-    {
-        $constructor = (new ReflectionClass($class))->getConstructor();
-
-        if ($constructor === null) {
-            throw new \RuntimeException("$class has no constructor");
-        }
-
-        foreach ($constructor->getParameters() as $param) {
-            if ($param->getName() === $paramName) {
-                /** @var \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type */
-                $type = $param->getType();
-
-                return new Dependency($param->getName(), $type);
-            }
-        }
-
-        throw new \RuntimeException("Parameter '$paramName' not found on $class");
-    }
-
-    // -------------------------------------------------------------------------
     // Successful ghost creation
     // -------------------------------------------------------------------------
 
@@ -177,5 +139,42 @@ class GhostResolverTest extends TestCase
         $this->expectExceptionMessage('"string"');
 
         $resolver->resolve($dependency, $this->buildContainer());
+    }
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function buildContainer(Binding ...$bindings): Container
+    {
+        $map = [];
+
+        foreach ($bindings as $binding) {
+            $map[$binding->abstract] = $binding;
+        }
+
+        return new Container(
+            new ResolverCatalogue([], GenericResolver::class),
+            new BindingCatalogue($map, [], []),
+        );
+    }
+
+    private function dependencyFrom(string $class, string $paramName): Dependency
+    {
+        $constructor = new ReflectionClass($class)->getConstructor();
+
+        if ($constructor === null) {
+            throw new \RuntimeException("{$class} has no constructor");
+        }
+
+        foreach ($constructor->getParameters() as $param) {
+            if ($param->getName() === $paramName) {
+                /** @var \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type */
+                $type = $param->getType();
+
+                return new Dependency($param->getName(), $type);
+            }
+        }
+
+        throw new \RuntimeException("Parameter '{$paramName}' not found on {$class}");
     }
 }

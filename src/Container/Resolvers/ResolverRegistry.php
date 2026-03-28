@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Engine\Container\Resolvers;
 
+use Engine\Container\Contracts\Resolver;
+
 final class ResolverRegistry
 {
     /**
-     * @var class-string<\Engine\Container\Contracts\Resolver<null>>|null
+     * @var class-string<Resolver<null>>|null
      */
     private(set) ?string $default = null;
 
@@ -16,7 +18,7 @@ final class ResolverRegistry
     private(set) array $resolvers = [];
 
     /**
-     * @param class-string<\Engine\Container\Contracts\Resolver<null>> $resolver
+     * @param class-string<Resolver<null>> $resolver
      *
      * @return static
      */
@@ -30,8 +32,8 @@ final class ResolverRegistry
     /**
      * @template TResolvable of \Engine\Container\Contracts\Resolvable
      *
-     * @param class-string<TResolvable>                                       $resolvable
-     * @param class-string<\Engine\Container\Contracts\Resolver<TResolvable>> $resolver
+     * @param class-string<TResolvable>           $resolvable
+     * @param class-string<Resolver<TResolvable>> $resolver
      *
      * @return self
      */

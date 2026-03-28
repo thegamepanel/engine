@@ -11,21 +11,21 @@ final class InvalidResolverException extends InvalidArgumentException implements
     public static function unregistered(string $resolvable): self
     {
         return new self(
-            sprintf('"%s" is not a registered resolvable.', $resolvable)
+            sprintf('"%s" is not a registered resolvable.', $resolvable),
         );
     }
 
     public static function resolvable(string $class): self
     {
         return new self(
-            sprintf('"%s" is not a valid resolvable.', $class)
+            sprintf('"%s" is not a valid resolvable.', $class),
         );
     }
 
     public static function resolver(string $class): self
     {
         return new self(
-            sprintf('"%s" is not a valid resolver.', $class)
+            sprintf('"%s" is not a valid resolver.', $class),
         );
     }
 

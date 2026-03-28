@@ -14,7 +14,7 @@ use Stringable;
  */
 class ClassWithDnfUnionParam
 {
-    public function __construct(public readonly (Stringable&Countable)|null $dep)
+    public function __construct(public readonly (Countable&Stringable)|null $dep)
     {
     }
 }

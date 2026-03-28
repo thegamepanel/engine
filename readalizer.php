@@ -35,7 +35,6 @@ use Readalizer\Readalizer\Rulesets\TypeSafetyRuleset;
  *   // @readalizer-suppress RuleA, RuleB      (preceding line, suppress named)
  */
 return [
-
     // Paths to scan when no paths are passed on the CLI.
     'paths' => [
         'src/',
@@ -47,7 +46,7 @@ return [
     // Cache results between runs.
     'cache' => [
         'enabled' => true,
-        'path' => '.readalizer-cache.json',
+        'path'    => '.readalizer-cache.json',
     ],
 
     // Optional baseline file to suppress known violations.
@@ -91,5 +90,4 @@ return [
         // Expressions & control flow
         // new CustomExpressionRule(),
     ],
-
 ];

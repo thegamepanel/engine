@@ -5,13 +5,13 @@ namespace Tests\Unit\Container\Fixtures;
 
 class ClassWithMethods
 {
-    public function callableMethod(): bool
-    {
-        return false;
-    }
-
     public static function callableStaticMethod(): bool
     {
         return true;
+    }
+
+    public function callableMethod(): bool
+    {
+        return false;
     }
 }

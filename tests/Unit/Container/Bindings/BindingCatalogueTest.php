@@ -150,5 +150,4 @@ class BindingCatalogueTest extends TestCase
 
         $this->assertNull($catalogue->get(ClassWithMethods::class, null, new TestQualifier()));
     }
-
 }

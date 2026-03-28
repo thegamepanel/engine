@@ -22,12 +22,14 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Tests\Unit\Container\Fixtures\AbstractInterface;
+use Tests\Unit\Container\Fixtures\AnotherTestQualifier;
 use Tests\Unit\Container\Fixtures\ClassWithDependency;
 use Tests\Unit\Container\Fixtures\ClassWithGhostAbstractDependency;
 use Tests\Unit\Container\Fixtures\ClassWithGhostDependency;
 use Tests\Unit\Container\Fixtures\ClassWithGhostScalarDependency;
 use Tests\Unit\Container\Fixtures\ClassWithLiminalDependency;
 use Tests\Unit\Container\Fixtures\ClassWithMethods;
+use Tests\Unit\Container\Fixtures\ClassWithMixedParams;
 use Tests\Unit\Container\Fixtures\ClassWithMultipleDependencies;
 use Tests\Unit\Container\Fixtures\ClassWithNamedAndQualifiedDependency;
 use Tests\Unit\Container\Fixtures\ClassWithNamedDependency;
@@ -35,47 +37,16 @@ use Tests\Unit\Container\Fixtures\ClassWithNoResolution;
 use Tests\Unit\Container\Fixtures\ClassWithPrivateMethod;
 use Tests\Unit\Container\Fixtures\ClassWithProperty;
 use Tests\Unit\Container\Fixtures\ClassWithScalarDefault;
-use Tests\Unit\Container\Fixtures\AnotherTestQualifier;
-use Tests\Unit\Container\Fixtures\ClassWithMixedParams;
-use Tests\Unit\Container\Fixtures\TaggedQualifier;
 use Tests\Unit\Container\Fixtures\ClassWithVariadicParam;
 use Tests\Unit\Container\Fixtures\ConcreteClass;
 use Tests\Unit\Container\Fixtures\LazyClass;
 use Tests\Unit\Container\Fixtures\LiminalClass;
+use Tests\Unit\Container\Fixtures\TaggedQualifier;
 use Tests\Unit\Container\Fixtures\TestQualifier;
 
 #[Group('unit'), Group('container')]
 class ContainerTest extends TestCase
 {
-    private function buildContainer(): Container
-    {
-        return new Container(
-            new ResolverCatalogue([], GenericResolver::class),
-            new BindingCatalogue([], [], []),
-        );
-    }
-
-    private function buildContainerWith(Binding ...$bindings): Container
-    {
-        $map = [];
-        foreach ($bindings as $binding) {
-            $map[$binding->abstract] = $binding;
-        }
-
-        return new Container(
-            new ResolverCatalogue([], GenericResolver::class),
-            new BindingCatalogue($map, [], []),
-        );
-    }
-
-    private function buildContainerWithGhostResolver(): Container
-    {
-        return new Container(
-            new ResolverCatalogue([Ghost::class => GhostResolver::class], GenericResolver::class),
-            new BindingCatalogue([], [], []),
-        );
-    }
-
     // -------------------------------------------------------------------------
     // Lazy proxy creation
     // -------------------------------------------------------------------------
@@ -90,7 +61,7 @@ class ContainerTest extends TestCase
 
         $result = $container->resolve(Resolution::for(ClassWithProperty::class)->lazily());
 
-        $this->assertTrue((new ReflectionClass(ClassWithProperty::class))->isUninitializedLazyObject($result));
+        $this->assertTrue(new ReflectionClass(ClassWithProperty::class)->isUninitializedLazyObject($result));
     }
 
     /**
@@ -104,7 +75,7 @@ class ContainerTest extends TestCase
 
         $result = $container->resolve(Resolution::for(ClassWithMethods::class)->lazily());
 
-        $this->assertFalse((new ReflectionClass(ClassWithMethods::class))->isUninitializedLazyObject($result));
+        $this->assertFalse(new ReflectionClass(ClassWithMethods::class)->isUninitializedLazyObject($result));
         $this->assertInstanceOf(ClassWithMethods::class, $result);
     }
 
@@ -119,7 +90,7 @@ class ContainerTest extends TestCase
 
         $result = $container->resolve(Resolution::for(ClassWithProperty::class)->lazily(), true);
 
-        $this->assertFalse((new ReflectionClass(ClassWithProperty::class))->isUninitializedLazyObject($result));
+        $this->assertFalse(new ReflectionClass(ClassWithProperty::class)->isUninitializedLazyObject($result));
         $this->assertInstanceOf(ClassWithProperty::class, $result);
     }
 
@@ -133,11 +104,11 @@ class ContainerTest extends TestCase
         $proxy     = $container->resolve(Resolution::for(ClassWithProperty::class)->lazily());
         $reflector = new ReflectionClass(ClassWithProperty::class);
 
-        $this->assertTrue(($reflector)->isUninitializedLazyObject($proxy));
+        $this->assertTrue($reflector->isUninitializedLazyObject($proxy));
 
         $proxy->value;
 
-        $this->assertFalse(($reflector)->isUninitializedLazyObject($proxy));
+        $this->assertFalse($reflector->isUninitializedLazyObject($proxy));
     }
 
     /**
@@ -151,7 +122,7 @@ class ContainerTest extends TestCase
 
         $result = $container->resolve(Resolution::for(LazyClass::class));
 
-        $this->assertTrue((new ReflectionClass(LazyClass::class))->isUninitializedLazyObject($result));
+        $this->assertTrue(new ReflectionClass(LazyClass::class)->isUninitializedLazyObject($result));
     }
 
     /**
@@ -165,7 +136,7 @@ class ContainerTest extends TestCase
 
         $result = $container->resolve(Resolution::for(LazyClass::class), true);
 
-        $this->assertFalse((new ReflectionClass(LazyClass::class))->isUninitializedLazyObject($result));
+        $this->assertFalse(new ReflectionClass(LazyClass::class)->isUninitializedLazyObject($result));
         $this->assertInstanceOf(LazyClass::class, $result);
     }
 
@@ -291,7 +262,7 @@ class ContainerTest extends TestCase
     #[Test]
     public function resolveWithLiminalResolutionStoresInstanceAsWeakReference(): void
     {
-        $container  = $this->buildContainerWith(
+        $container = $this->buildContainerWith(
             new Binding(ClassWithProperty::class, shared: true),
         );
         $resolution = Resolution::for(ClassWithProperty::class)->liminal();
@@ -317,7 +288,7 @@ class ContainerTest extends TestCase
     {
         // ClassWithMethods has no constructor and no #[Liminal] attribute;
         // the liminal flag must survive the auto-wiring code path unchanged.
-        $container  = $this->buildContainerWith(
+        $container = $this->buildContainerWith(
             new Binding(ClassWithMethods::class, shared: true),
         );
         $resolution = Resolution::for(ClassWithMethods::class)->liminal();
@@ -412,7 +383,7 @@ class ContainerTest extends TestCase
         $result = $container->resolve(Resolution::for(ClassWithGhostDependency::class));
 
         $this->assertTrue(
-            (new ReflectionClass(ClassWithProperty::class))->isUninitializedLazyObject($result->dependency),
+            new ReflectionClass(ClassWithProperty::class)->isUninitializedLazyObject($result->dependency),
         );
     }
 
@@ -560,7 +531,6 @@ class ContainerTest extends TestCase
         $this->assertFalse($result);
     }
 
-
     // -------------------------------------------------------------------------
     // Named and qualified binding resolution
     // -------------------------------------------------------------------------
@@ -591,11 +561,11 @@ class ContainerTest extends TestCase
     #[Test]
     public function resolveWithQualifiedBindingCachesAndReturnsQualifiedInstance(): void
     {
-        $qualifier      = new TestQualifier();
-        $qualInstance   = new ClassWithMethods();
-        $qualBinding    = new Binding(ClassWithMethods::class, instance: $qualInstance);
-        $mainBinding    = new Binding(ClassWithMethods::class, qualifiedMap: [TestQualifier::class => $qualBinding]);
-        $container      = $this->buildContainerWith($mainBinding);
+        $qualifier    = new TestQualifier();
+        $qualInstance = new ClassWithMethods();
+        $qualBinding  = new Binding(ClassWithMethods::class, instance: $qualInstance);
+        $mainBinding  = new Binding(ClassWithMethods::class, qualifiedMap: [TestQualifier::class => $qualBinding]);
+        $container    = $this->buildContainerWith($mainBinding);
 
         $first  = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier));
         $second = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier));
@@ -732,7 +702,7 @@ class ContainerTest extends TestCase
         $container = $this->buildContainer();
 
         $result = $container->invoke(
-            Invocation::constructor(ClassWithScalarDefault::class)->with(['name' => 'custom'])
+            Invocation::constructor(ClassWithScalarDefault::class)->with(['name' => 'custom']),
         );
 
         $this->assertSame('custom', $result->name);
@@ -780,10 +750,10 @@ class ContainerTest extends TestCase
     #[Test]
     public function resolveWithQualifiedResolutionDoesNotReturnNonQualifiedSharedInstance(): void
     {
-        $qualifier    = new TestQualifier();
-        $qualBinding  = new Binding(ClassWithMethods::class, shared: true);
-        $mainBinding  = new Binding(ClassWithMethods::class, shared: true, qualifiedMap: [TestQualifier::class => $qualBinding]);
-        $container    = $this->buildContainerWith($mainBinding);
+        $qualifier   = new TestQualifier();
+        $qualBinding = new Binding(ClassWithMethods::class, shared: true);
+        $mainBinding = new Binding(ClassWithMethods::class, shared: true, qualifiedMap: [TestQualifier::class => $qualBinding]);
+        $container   = $this->buildContainerWith($mainBinding);
 
         $shared    = $container->resolve(Resolution::for(ClassWithMethods::class));
         $qualified = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier));
@@ -829,8 +799,8 @@ class ContainerTest extends TestCase
     #[Test]
     public function resolveWithQualifiedResolutionUsesEqualityCheckNotJustClassCheck(): void
     {
-        $qualifierA  = new TaggedQualifier('a');
-        $qualifierB  = new TaggedQualifier('b');
+        $qualifierA = new TaggedQualifier('a');
+        $qualifierB = new TaggedQualifier('b');
         // A single binding slot for TaggedQualifier::class — both 'a' and 'b' resolve
         // through it, creating distinct shared instances stored under their respective
         // qualifier instances.
@@ -862,10 +832,39 @@ class ContainerTest extends TestCase
         $container = $this->buildContainer();
 
         $result = $container->invoke(
-            Invocation::constructor(ClassWithMixedParams::class)->with(['name' => 'hello'])
+            Invocation::constructor(ClassWithMixedParams::class)->with(['name' => 'hello']),
         );
 
         $this->assertSame('hello', $result->name);
         $this->assertInstanceOf(ClassWithMethods::class, $result->dep);
+    }
+
+    private function buildContainer(): Container
+    {
+        return new Container(
+            new ResolverCatalogue([], GenericResolver::class),
+            new BindingCatalogue([], [], []),
+        );
+    }
+
+    private function buildContainerWith(Binding ...$bindings): Container
+    {
+        $map = [];
+        foreach ($bindings as $binding) {
+            $map[$binding->abstract] = $binding;
+        }
+
+        return new Container(
+            new ResolverCatalogue([], GenericResolver::class),
+            new BindingCatalogue($map, [], []),
+        );
+    }
+
+    private function buildContainerWithGhostResolver(): Container
+    {
+        return new Container(
+            new ResolverCatalogue([Ghost::class => GhostResolver::class], GenericResolver::class),
+            new BindingCatalogue([], [], []),
+        );
     }
 }

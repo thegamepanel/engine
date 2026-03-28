@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Engine\Container\Bindings;
 
 use Closure;
+use Engine\Container\Contracts\Qualifier;
 
 /**
  * Binding
@@ -13,8 +14,6 @@ use Closure;
  * be bound to a concrete implementation, by either class name or instance, or
  * to a factory containing explicit resolution logic.
  *
- * @package Container\Bindings
- *
  * @template TAbstract of object
  */
 final readonly class Binding
@@ -22,9 +21,9 @@ final readonly class Binding
     /**
      * Create a new binding from a builder instance.
      *
-     * @param \Engine\Container\Bindings\BindingBuilder<TAbstract>                        $builder
-     * @param array<string, self<TAbstract>>                                              $namedBindings
-     * @param array<class-string<\Engine\Container\Contracts\Qualifier>, self<TAbstract>> $qualifiedBindings
+     * @param BindingBuilder<TAbstract>                       $builder
+     * @param array<string, self<TAbstract>>                  $namedBindings
+     * @param array<class-string<Qualifier>, self<TAbstract>> $qualifiedBindings
      *
      * @return self<TAbstract>
      */
@@ -32,14 +31,14 @@ final readonly class Binding
         BindingBuilder $builder,
         array          $namedBindings = [],
         array          $qualifiedBindings = [],
-    ): self
-    {
+    ): self {
         $concrete = $builder->concrete;
         $aliases  = $builder->aliases;
 
         if ($builder->concrete) {
             /**
              * Ensure that the concrete is also an alias.
+             *
              * @var array<class-string<TAbstract>> $aliases
              */
             $aliases = array_merge([$concrete], $aliases);
@@ -90,7 +89,7 @@ final readonly class Binding
     /**
      * The factory to use when resolving this binding.
      *
-     * @var (\Closure(): TAbstract)|null
+     * @var (Closure(): TAbstract)|null
      */
     public ?Closure $factory;
 
@@ -104,7 +103,7 @@ final readonly class Binding
     /**
      * A mapping of child bindings based on their qualifiers.
      *
-     * @var array<class-string<\Engine\Container\Contracts\Qualifier>, self<TAbstract>>
+     * @var array<class-string<Qualifier>, self<TAbstract>>
      */
     public array $qualifiedMap;
 
@@ -130,16 +129,16 @@ final readonly class Binding
     public bool $shared;
 
     /**
-     * @param class-string<TAbstract>                                                     $abstract
-     * @param class-string<TAbstract>|null                                                $concrete
-     * @param TAbstract|null                                                              $instance
-     * @param array<class-string<TAbstract>>                                              $aliases
-     * @param (\Closure(): TAbstract)|null                                                $factory
-     * @param array<string, self<TAbstract>>                                              $namedMap
-     * @param array<class-string<\Engine\Container\Contracts\Qualifier>, self<TAbstract>> $qualifiedMap
-     * @param bool                                                                        $liminal
-     * @param bool                                                                        $lazily
-     * @param bool                                                                        $shared
+     * @param class-string<TAbstract>                         $abstract
+     * @param class-string<TAbstract>|null                    $concrete
+     * @param TAbstract|null                                  $instance
+     * @param array<class-string<TAbstract>>                  $aliases
+     * @param (Closure(): TAbstract)|null                     $factory
+     * @param array<string, self<TAbstract>>                  $namedMap
+     * @param array<class-string<Qualifier>, self<TAbstract>> $qualifiedMap
+     * @param bool                                            $liminal
+     * @param bool                                            $lazily
+     * @param bool                                            $shared
      */
     public function __construct(
         string   $abstract,
@@ -152,8 +151,7 @@ final readonly class Binding
         bool     $liminal = false,
         bool     $lazily = false,
         bool     $shared = true,
-    )
-    {
+    ) {
         $this->abstract     = $abstract;
         $this->concrete     = $concrete;
         $this->instance     = $instance;

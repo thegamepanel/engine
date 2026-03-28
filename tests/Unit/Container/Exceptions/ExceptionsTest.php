@@ -158,9 +158,9 @@ class ExceptionsTest extends TestCase
         $this->assertSame(
             sprintf(
                 'The class LockedClass is marked with \'%s\', so cannot be resolved automatically.',
-                NoResolution::class
+                NoResolution::class,
             ),
-            $e->getMessage()
+            $e->getMessage(),
         );
     }
 
@@ -331,5 +331,4 @@ class ExceptionsTest extends TestCase
         $this->assertInstanceOf(InvalidInvocationException::class, $e);
         $this->assertSame('Cannot invoke a non-string method.', $e->getMessage());
     }
-
 }

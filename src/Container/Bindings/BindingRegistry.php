@@ -27,7 +27,7 @@ final class BindingRegistry
      *
      * @param class-string<TAbstract> $abstract
      *
-     * @return \Engine\Container\Bindings\BindingBuilder<TAbstract>
+     * @return BindingBuilder<TAbstract>
      */
     public function bind(string $abstract): BindingBuilder
     {

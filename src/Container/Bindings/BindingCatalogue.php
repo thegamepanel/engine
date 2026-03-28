@@ -31,15 +31,14 @@ final readonly class BindingCatalogue
 
     /**
      * @param array<class-string, \Engine\Container\Bindings\Binding<*>> $bindings
-     * @param array<class-string, class-string>                          $aliases
-     * @param array<string, array<class-string>>                         $scoped
+     * @param array<class-string, class-string>  $aliases
+     * @param array<string, array<class-string>> $scoped
      */
     public function __construct(
         array $bindings,
         array $aliases,
         array $scoped,
-    )
-    {
+    ) {
         $this->bindings = $bindings;
         $this->aliases  = $aliases;
         $this->scoped   = $scoped;
@@ -48,11 +47,11 @@ final readonly class BindingCatalogue
     /**
      * @template TClass of object
      *
-     * @param class-string<TClass>                       $class
-     * @param \Engine\Container\Attributes\Named|null    $named
-     * @param \Engine\Container\Contracts\Qualifier|null $qualifier
+     * @param class-string<TClass> $class
+     * @param Named|null           $named
+     * @param Qualifier|null       $qualifier
      *
-     * @return \Engine\Container\Bindings\Binding<TClass>|null
+     * @return Binding<TClass>|null
      */
     public function get(string $class, ?Named $named = null, ?Qualifier $qualifier = null): ?Binding
     {
@@ -62,7 +61,7 @@ final readonly class BindingCatalogue
             return null;
         }
 
-        /** @var \Engine\Container\Bindings\Binding<TClass> $binding */
+        /** @var Binding<TClass> $binding */
         $binding = $this->bindings[$class];
 
         if ($named !== null) {

@@ -7,6 +7,7 @@ use Engine\Container\Attributes\Lazy;
 use Engine\Container\Attributes\Liminal;
 use Engine\Container\Attributes\Named;
 use Engine\Container\Attributes\NoResolution;
+use Engine\Container\Bindings\Binding;
 use Engine\Container\Bindings\BindingCatalogue;
 use Engine\Container\Contracts\Qualifier;
 use Engine\Container\Contracts\Resolvable;
@@ -24,12 +25,12 @@ use WeakReference;
 
 final class Container
 {
+    private(set) BindingCatalogue $bindings;
+
     /**
-     * @var \Engine\Container\Resolvers\ResolverCatalogue
+     * @var ResolverCatalogue
      */
     private ResolverCatalogue $resolvers;
-
-    private(set) BindingCatalogue $bindings;
 
     /**
      * @var array<class-string, object>
@@ -37,7 +38,7 @@ final class Container
     private array $instances = [];
 
     /**
-     * @var array<class-string, \WeakReference<object>>
+     * @var array<class-string, WeakReference<object>>
      */
     private array $liminalInstances = [];
 
@@ -47,123 +48,20 @@ final class Container
     private array $namedInstances = [];
 
     /**
-     * @var array<class-string, array{\Engine\Container\Contracts\Qualifier, object}>
+     * @var array<class-string, array{Qualifier, object}>
      */
     private array $qualifiedInstances = [];
 
     /**
-     * @param \Engine\Container\Resolvers\ResolverCatalogue $resolvers
-     * @param \Engine\Container\Bindings\BindingCatalogue   $bindings
+     * @param ResolverCatalogue $resolvers
+     * @param BindingCatalogue  $bindings
      */
     public function __construct(
         ResolverCatalogue $resolvers,
         BindingCatalogue  $bindings,
-    )
-    {
+    ) {
         $this->resolvers = $resolvers;
         $this->bindings  = $bindings;
-    }
-
-    /**
-     * Get a previously resolved instance.
-     *
-     * @template TClass of object
-     *
-     * @param \Engine\Container\Resolution<TClass> $resolution
-     *
-     * @return TClass|null
-     */
-    private function getResolved(Resolution $resolution): ?object
-    {
-        if ($resolution->isNamed()) {
-            /** @var TClass|null */
-            return $this->namedInstances[$resolution->class][$resolution->name] ?? null;
-        }
-
-        if ($resolution->isQualified()) {
-            /** @var array{\Engine\Container\Contracts\Qualifier, object} $instances */
-            $instances = $this->qualifiedInstances[$resolution->class] ?? [];
-
-            /**
-             * @var \Engine\Container\Contracts\Qualifier $qualifier
-             * @var object                                $instance
-             *
-             * @noinspection PhpLoopCanBeConvertedToArrayFindInspection
-             */
-            foreach ($instances as [$qualifier, $instance]) {
-                if (
-                    $qualifier::class === $resolution->qualifier::class
-                    && $qualifier->equals($resolution->qualifier)
-                ) {
-                    /** @var TClass */
-                    return $instance;
-                }
-            }
-
-            return null;
-        }
-
-        if ($resolution->isLiminal()) {
-            if (isset($this->liminalInstances[$resolution->class])) {
-                /** @var TClass|null */
-                return $this->liminalInstances[$resolution->class]->get(); // @infection-ignore-all
-            }
-
-            return null;
-        }
-
-        /** @var TClass|null */
-        return $this->instances[$resolution->class] ?? null;
-    }
-
-    /**
-     * Create a lazy proxy for a resolution.
-     *
-     * @template TClass of object
-     *
-     * @param \Engine\Container\Resolution<TClass> $resolution
-     *
-     * @return TClass
-     */
-    private function lazy(Resolution $resolution): object
-    {
-        return ReflectionHelper::getLazyProxy(
-            $resolution->class,
-            fn () => $this->resolve($resolution, true),
-        );
-    }
-
-    /**
-     * Store a resolved instance and return it.
-     *
-     * @template TClass of object
-     *
-     * @param \Engine\Container\Resolution<TClass>            $resolution
-     * @param \Engine\Container\Bindings\Binding<TClass>|null $binding
-     * @param TClass                                          $instance
-     * @param bool                                            $liminal
-     *
-     * @return TClass
-     */
-    private function storeResolved(Resolution $resolution, ?Bindings\Binding $binding, object $instance, bool $liminal): object
-    {
-        $class = $binding->abstract ?? $resolution->class;
-
-        if ($liminal) {
-            $this->liminalInstances[$class] = WeakReference::create($instance);
-
-            return $instance;
-        }
-
-        if ($resolution->isNamed()) {
-            $this->namedInstances[$class][$resolution->name] = $instance;
-        } else if ($resolution->isQualified()) {
-            $this->qualifiedInstances[$class][] = [$resolution->qualifier, $instance];
-        } else {
-            $this->instances[$class] = $instance;
-        }
-
-        return $instance;
     }
 
     /**
@@ -171,8 +69,8 @@ final class Container
      *
      * @template TClass of object
      *
-     * @param \Engine\Container\Resolution<TClass> $resolution
-     * @param bool                                 $skipLazy
+     * @param Resolution<TClass> $resolution
+     * @param bool               $skipLazy
      *
      * @return TClass
      */
@@ -296,6 +194,108 @@ final class Container
     }
 
     /**
+     * Get a previously resolved instance.
+     *
+     * @template TClass of object
+     *
+     * @param Resolution<TClass> $resolution
+     *
+     * @return TClass|null
+     */
+    private function getResolved(Resolution $resolution): ?object
+    {
+        if ($resolution->isNamed()) {
+            /** @var TClass|null */
+            return $this->namedInstances[$resolution->class][$resolution->name] ?? null;
+        }
+
+        if ($resolution->isQualified()) {
+            /** @var array{Qualifier, object} $instances */
+            $instances = $this->qualifiedInstances[$resolution->class] ?? [];
+
+            /**
+             * @var Qualifier $qualifier
+             * @var object    $instance
+             *
+             * @noinspection PhpLoopCanBeConvertedToArrayFindInspection
+             */
+            foreach ($instances as [$qualifier, $instance]) {
+                if (
+                    $qualifier::class === $resolution->qualifier::class
+                    && $qualifier->equals($resolution->qualifier)
+                ) {
+                    /** @var TClass */
+                    return $instance;
+                }
+            }
+
+            return null;
+        }
+
+        if ($resolution->isLiminal()) {
+            if (isset($this->liminalInstances[$resolution->class])) {
+                /** @var TClass|null */
+                return $this->liminalInstances[$resolution->class]->get(); // @infection-ignore-all
+            }
+
+            return null;
+        }
+
+        /** @var TClass|null */
+        return $this->instances[$resolution->class] ?? null;
+    }
+
+    /**
+     * Create a lazy proxy for a resolution.
+     *
+     * @template TClass of object
+     *
+     * @param Resolution<TClass> $resolution
+     *
+     * @return TClass
+     */
+    private function lazy(Resolution $resolution): object
+    {
+        return ReflectionHelper::getLazyProxy(
+            $resolution->class,
+            fn () => $this->resolve($resolution, true),
+        );
+    }
+
+    /**
+     * Store a resolved instance and return it.
+     *
+     * @template TClass of object
+     *
+     * @param Resolution<TClass>   $resolution
+     * @param Binding<TClass>|null $binding
+     * @param TClass               $instance
+     * @param bool                 $liminal
+     *
+     * @return TClass
+     */
+    private function storeResolved(Resolution $resolution, ?Binding $binding, object $instance, bool $liminal): object
+    {
+        $class = $binding->abstract ?? $resolution->class;
+
+        if ($liminal) {
+            $this->liminalInstances[$class] = WeakReference::create($instance);
+
+            return $instance;
+        }
+
+        if ($resolution->isNamed()) {
+            $this->namedInstances[$class][$resolution->name] = $instance;
+        } else if ($resolution->isQualified()) {
+            $this->qualifiedInstances[$class][] = [$resolution->qualifier, $instance];
+        } else {
+            $this->instances[$class] = $instance;
+        }
+
+        return $instance;
+    }
+
+    /**
      * @param callable             $callable
      * @param array<string, mixed> $arguments
      *
@@ -305,17 +305,17 @@ final class Container
     {
         return $callable(...$this->collectDependencies(
             ReflectionHelper::getFunctionReflector($callable),
-            $arguments
+            $arguments,
         ));
     }
 
     /**
      * @template TClass of object
      *
-     * @param class-string<TClass>         $class
-     * @param string                       $method
-     * @param \Engine\Container\Invocation $invocation
-     * @param TClass|null                  $object
+     * @param class-string<TClass> $class
+     * @param string               $method
+     * @param Invocation           $invocation
+     * @param TClass|null          $object
      *
      * @return mixed
      */
@@ -364,8 +364,8 @@ final class Container
     /**
      * Collect the dependencies for the given method or function.
      *
-     * @param \ReflectionFunctionAbstract $reflector
-     * @param array<string, mixed>        $arguments
+     * @param ReflectionFunctionAbstract $reflector
+     * @param array<string, mixed>       $arguments
      *
      * @return array<string, mixed>
      */
@@ -400,7 +400,7 @@ final class Container
     /**
      * Create a dependency representation from the given parameter.
      *
-     * @param \ReflectionParameter $parameter
+     * @param ReflectionParameter $parameter
      *
      * @return \Engine\Container\Dependency<*, *, *>
      */
@@ -434,7 +434,7 @@ final class Container
      * @template TQualifier of \Engine\Container\Contracts\Qualifier|null = null
      * @template TResolvable of \Engine\Container\Contracts\Resolvable|null = null
      *
-     * @param \Engine\Container\Dependency<TType, TQualifier, TResolvable> $dependency
+     * @param Dependency<TType, TQualifier, TResolvable> $dependency
      *
      * @return TType
      */
@@ -456,7 +456,7 @@ final class Container
      *
      * @param \Engine\Container\Dependency<TType, *, TResolvable> $dependency
      *
-     * @return \Engine\Container\Contracts\Resolver<TResolvable>
+     * @return Resolver<TResolvable>
      */
     private function getDependencyResolver(Dependency $dependency): Resolver
     {
@@ -472,7 +472,7 @@ final class Container
          * This has to be here because it complains about TDefaultResolver,
          * even though the types are the same.
          *
-         * @var \Engine\Container\Contracts\Resolver<TResolvable> $resolver
+         * @var Resolver<TResolvable> $resolver
          */
         return $resolver;
     }

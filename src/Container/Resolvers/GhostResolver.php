@@ -21,8 +21,8 @@ final class GhostResolver implements Resolver
      * @template TType of mixed
      *
      * @param \Engine\Container\Dependency<TType, *, \Engine\Container\Attributes\Ghost> $dependency
-     * @param \Engine\Container\Container                                                $container
-     * @param array<string, mixed>                                                       $arguments
+     * @param Container            $container
+     * @param array<string, mixed> $arguments
      *
      * @return TType&object
      */
@@ -43,12 +43,13 @@ final class GhostResolver implements Resolver
 
         /** @var TType&object $instance */
         $instance = ReflectionHelper::getClassReflector($concreteClass)
-                                    ->newLazyGhost(function (object $lazy) use ($container, $arguments): void {
-                                        // Invoke the constructor for this class if it has one.
-                                        if (method_exists($lazy, '__construct')) {
-                                            $container->invoke(Invocation::constructor($lazy)->with($arguments));
-                                        }
-                                    });
+            ->newLazyGhost(function (object $lazy) use ($container, $arguments): void {
+                // Invoke the constructor for this class if it has one.
+                if (method_exists($lazy, '__construct')) {
+                    $container->invoke(Invocation::constructor($lazy)->with($arguments));
+                }
+            })
+        ;
 
         return $instance;
     }

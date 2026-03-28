@@ -18,11 +18,6 @@ use Tests\Unit\Container\Fixtures\TestResolvable;
 #[Group('unit'), Group('container'), Group('resolvers')]
 class ResolverCatalogueTest extends TestCase
 {
-    private function buildContainer(ResolverCatalogue $catalogue): Container
-    {
-        return new Container($catalogue, new BindingCatalogue([], [], []));
-    }
-
     /**
      * - The catalogue stores both the resolvable-to-resolver map and the default
      *   resolver class-string for later instantiation.
@@ -122,5 +117,10 @@ class ResolverCatalogueTest extends TestCase
         $second = $catalogue->get($container, new TestResolvable());
 
         $this->assertSame($first, $second);
+    }
+
+    private function buildContainer(ResolverCatalogue $catalogue): Container
+    {
+        return new Container($catalogue, new BindingCatalogue([], [], []));
     }
 }

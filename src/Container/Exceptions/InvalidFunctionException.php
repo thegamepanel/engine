@@ -13,7 +13,7 @@ final class InvalidFunctionException extends RuntimeException implements Contain
     {
         return new self(sprintf(
             'The provided function %s does not exist.',
-            $function
+            $function,
         ), previous: $previous);
     }
 }

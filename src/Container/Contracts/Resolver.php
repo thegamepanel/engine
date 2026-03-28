@@ -21,8 +21,8 @@ interface Resolver
      * @template TType of mixed
      *
      * @param \Engine\Container\Dependency<TType, *, TAttribute> $dependency
-     * @param \Engine\Container\Container                        $container
-     * @param array<string, mixed>                               $arguments
+     * @param Container            $container
+     * @param array<string, mixed> $arguments
      *
      * @return TType
      */

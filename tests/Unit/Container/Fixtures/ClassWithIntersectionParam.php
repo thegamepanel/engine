@@ -13,7 +13,7 @@ use Stringable;
  */
 class ClassWithIntersectionParam
 {
-    public function __construct(public readonly Stringable&Countable $dep)
+    public function __construct(public readonly Countable&Stringable $dep)
     {
     }
 }
