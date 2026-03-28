@@ -20,7 +20,8 @@
     "readalizer/readalizer"        : "^1.0",
     "jetbrains/phpstorm-attributes": "^1.2",
     "phpstan/phpstan-phpunit"      : "^2.0",
-    "infection/infection"          : "^0.32.6"
+    "infection/infection"          : "^0.32.6",
+    "friendsofphp/php-cs-fixer"    : "^3.94"
   },
   "autoload"    : {
     "psr-4": {
