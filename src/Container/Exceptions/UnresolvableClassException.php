@@ -13,7 +13,8 @@ final class UnresolvableClassException extends InvalidArgumentException implemen
     {
         return new self(sprintf(
             'The class %s is marked with \'%s\', so cannot be resolved automatically.',
-            $class, NoResolution::class
+            $class,
+            NoResolution::class,
         ));
     }
 }

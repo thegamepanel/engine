@@ -38,7 +38,7 @@ final class Invocation
      *
      * @return static
      */
-    public static function constructor(string|object $class): self
+    public static function constructor(object|string $class): self
     {
         return self::method($class, '__construct');
     }

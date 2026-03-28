@@ -13,7 +13,8 @@ final class MethodCallException extends RuntimeException implements ContainerExc
     {
         return new self(sprintf(
             'Unable to call the provided method %s::%s.',
-            $class, $method
+            $class,
+            $method,
         ), previous: $previous);
     }
 }

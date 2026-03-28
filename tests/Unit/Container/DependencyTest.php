@@ -108,10 +108,11 @@ class DependencyTest extends TestCase
     #[Test]
     public function parameterAndTypeAreStoredAsGiven(): void
     {
-        $type = (new ReflectionClass(ClassWithTypedParameters::class))
+        $type = new ReflectionClass(ClassWithTypedParameters::class)
             ->getConstructor()
             ->getParameters()[0]
-            ->getType();
+            ->getType()
+        ;
 
         $dependency = new Dependency('namedType', $type);
 

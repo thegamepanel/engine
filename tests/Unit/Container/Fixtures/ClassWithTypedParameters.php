@@ -16,8 +16,8 @@ class ClassWithTypedParameters
 {
     public function __construct(
         public readonly ClassWithMethods $namedType,
-        public readonly string|int $unionType,
-        public readonly Stringable&Countable $intersectionType,
+        public readonly int|string $unionType,
+        public readonly Countable&Stringable $intersectionType,
     ) {
     }
 }

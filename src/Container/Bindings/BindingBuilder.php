@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace Engine\Container\Bindings;
 
 use Closure;
+use Engine\Container\Contracts\Qualifier;
 
 /**
  * Binding Builder
  * ---------------
  *
  * Used to programmatically build bindings.
- *
- * @package Container\Bindings
  *
  * @template TAbstract of object
  */
@@ -55,7 +54,7 @@ final class BindingBuilder
     /**
      * The factory to use when resolving this binding.
      *
-     * @var (\Closure(): TAbstract)|null
+     * @var (Closure(): TAbstract)|null
      */
     private(set) Closure|null $factory = null;
 
@@ -69,7 +68,7 @@ final class BindingBuilder
     /**
      * The qualifier class to identify this binding by.
      *
-     * @var class-string<\Engine\Container\Contracts\Qualifier>|null
+     * @var class-string<Qualifier>|null
      */
     private(set) ?string $qualifier = null;
 
@@ -111,7 +110,7 @@ final class BindingBuilder
      *
      * @return static
      */
-    public function to(string|object $concrete): self
+    public function to(object|string $concrete): self
     {
         $this->concrete = is_object($concrete) ? $concrete::class : $concrete;
         $this->instance = is_object($concrete) ? $concrete : null;
@@ -136,7 +135,7 @@ final class BindingBuilder
     /**
      * Use the given factory to resolve the binding.
      *
-     * @param \Closure(): TAbstract $factory
+     * @param Closure(): TAbstract $factory
      *
      * @return static
      */
@@ -164,7 +163,7 @@ final class BindingBuilder
     /**
      * Identify the binding by the given qualifier.
      *
-     * @param class-string<\Engine\Container\Contracts\Qualifier> $qualifier
+     * @param class-string<Qualifier> $qualifier
      *
      * @return static
      */

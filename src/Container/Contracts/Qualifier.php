@@ -7,15 +7,13 @@ namespace Engine\Container\Contracts;
  * ------------------
  *
  * Marks a PHP attribute as a dependency injection qualifier.
- *
- * @package Container
  */
 interface Qualifier
 {
     /**
      * Check if the qualifier is equal to another.
      *
-     * @param \Engine\Container\Contracts\Qualifier $other
+     * @param Qualifier $other
      *
      * @return bool
      */

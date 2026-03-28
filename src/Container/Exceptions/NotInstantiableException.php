@@ -13,7 +13,7 @@ final class NotInstantiableException extends InvalidArgumentException implements
     {
         return new self(
             sprintf('Class %s is not instantiable', $class),
-            previous: $previous
+            previous: $previous,
         );
     }
 }

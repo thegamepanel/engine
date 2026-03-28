@@ -14,57 +14,6 @@ use Tests\Unit\Container\Fixtures\ClassWithMethods;
 class InvocationTest extends TestCase
 {
     /**
-     * @return array<string, array{callable}>
-     */
-    public static function callableDataProvider(): array
-    {
-        return [
-            'short function'  => [static fn () => 'foo'],
-            'long function'   => [
-                function () {
-                    return 'foo';
-                },
-            ],
-            'callable string' => ['strlen'],
-            'object method'   => [[new ClassWithMethods(), 'callableMethod']],
-            'static method'   => [[ClassWithMethods::class, 'callableStaticMethod']],
-        ];
-    }
-
-    /**
-     * @return array<string, array{string|object, string}>
-     */
-    public static function methodDataProvider(): array
-    {
-        return [
-            'class string' => [ClassWithMethods::class, 'callableMethod'],
-            'object'       => [new ClassWithMethods(), 'callableMethod'],
-        ];
-    }
-
-    /**
-     * @return array<string, array{string|object}>
-     */
-    public static function constructorDataProvider(): array
-    {
-        return [
-            'class string' => [ClassWithMethods::class],
-            'object'       => [new ClassWithMethods()],
-        ];
-    }
-
-    /**
-     * @return array<string, array{string|object, string, array<string, string>}>
-     */
-    public static function withArgumentsDataProvider(): array
-    {
-        return [
-            'class string' => [ClassWithMethods::class, 'callableMethod', ['arg1' => 'value1', 'arg2' => 'value2']],
-            'object'       => [new ClassWithMethods(), 'callableMethod', ['arg1' => 'value1', 'arg2' => 'value2']],
-        ];
-    }
-
-    /**
      * - A callable invocation has no class reference and carries the callable as its
      *   invokable, covering closures, named functions, and array callables.
      */
@@ -81,11 +30,29 @@ class InvocationTest extends TestCase
     }
 
     /**
+     * @return array<string, array{callable}>
+     */
+    public static function callableDataProvider(): array
+    {
+        return [
+            'short function' => [static fn () => 'foo'],
+            'long function'  => [
+                function () {
+                    return 'foo';
+                },
+            ],
+            'callable string' => ['strlen'],
+            'object method'   => [[new ClassWithMethods(), 'callableMethod']],
+            'static method'   => [[ClassWithMethods::class, 'callableStaticMethod']],
+        ];
+    }
+
+    /**
      * - A method-call invocation carries both a class/object target and a method name,
      *   supporting both class-string and object forms of the target.
      */
     #[Test, DataProvider('methodDataProvider')]
-    public function createsMethodCallRepresentationSuccessfully(string|object $class, string $method): void
+    public function createsMethodCallRepresentationSuccessfully(object|string $class, string $method): void
     {
         $instance = Invocation::method($class, $method);
 
@@ -97,11 +64,22 @@ class InvocationTest extends TestCase
     }
 
     /**
+     * @return array<string, array{string|object, string}>
+     */
+    public static function methodDataProvider(): array
+    {
+        return [
+            'class string' => [ClassWithMethods::class, 'callableMethod'],
+            'object'       => [new ClassWithMethods(), 'callableMethod'],
+        ];
+    }
+
+    /**
      * - A constructor invocation is a specialised method call targeting `__construct`,
      *   accepting both class-string and object forms of the target.
      */
     #[Test, DataProvider('constructorDataProvider')]
-    public function createsConstructorCallRepresentationSuccessfully(string|object $class): void
+    public function createsConstructorCallRepresentationSuccessfully(object|string $class): void
     {
         $instance = Invocation::constructor($class);
 
@@ -113,17 +91,39 @@ class InvocationTest extends TestCase
     }
 
     /**
+     * @return array<string, array{string|object}>
+     */
+    public static function constructorDataProvider(): array
+    {
+        return [
+            'class string' => [ClassWithMethods::class],
+            'object'       => [new ClassWithMethods()],
+        ];
+    }
+
+    /**
      * - `with()` modifies the invocation in place and returns the same instance,
      *   allowing fluent method chaining.
      */
     #[Test, DataProvider('withArgumentsDataProvider')]
-    public function withArgumentsMutatesAndReturnsTheSameInstance(string|object $class, string $method, array $arguments): void
+    public function withArgumentsMutatesAndReturnsTheSameInstance(object|string $class, string $method, array $arguments): void
     {
         $instance = Invocation::method($class, $method);
         $result   = $instance->with($arguments);
 
         $this->assertSame($instance, $result);
         $this->assertSame($arguments, $instance->arguments);
+    }
+
+    /**
+     * @return array<string, array{string|object, string, array<string, string>}>
+     */
+    public static function withArgumentsDataProvider(): array
+    {
+        return [
+            'class string' => [ClassWithMethods::class, 'callableMethod', ['arg1' => 'value1', 'arg2' => 'value2']],
+            'object'       => [new ClassWithMethods(), 'callableMethod', ['arg1' => 'value1', 'arg2' => 'value2']],
+        ];
     }
 
     /**

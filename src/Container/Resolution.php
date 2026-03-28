@@ -37,12 +37,12 @@ final class Resolution
     private(set) ?string $name = null;
 
     /**
-     * @var \Engine\Container\Contracts\Qualifier|null
+     * @var Qualifier|null
      */
     private(set) ?Qualifier $qualifier = null;
 
     /**
-     * @var \Engine\Container\Contracts\Resolvable|null
+     * @var Resolvable|null
      */
     private(set) ?Resolvable $resolvable = null;
 
@@ -89,7 +89,7 @@ final class Resolution
     }
 
     /**
-     * @param \Engine\Container\Contracts\Qualifier $qualifier
+     * @param Qualifier $qualifier
      *
      * @return static
      */
@@ -101,7 +101,7 @@ final class Resolution
     }
 
     /**
-     * @param \Engine\Container\Contracts\Resolvable $resolvable
+     * @param Resolvable $resolvable
      *
      * @return static
      */
@@ -136,6 +136,7 @@ final class Resolution
      * @return bool
      *
      * @phpstan-assert-if-true true $this->lazily
+     *
      * @phpstan-assert-if-false false $this->lazily
      */
     public function shouldResolveLazily(): bool
@@ -147,6 +148,7 @@ final class Resolution
      * @return bool
      *
      * @phpstan-assert-if-true !null $this->resolvable
+     *
      * @phpstan-assert-if-false null $this->resolvable
      */
     public function usesCustomResolver(): bool
@@ -158,6 +160,7 @@ final class Resolution
      * @return bool
      *
      * @phpstan-assert-if-true string $this->name
+     *
      * @phpstan-assert-if-false null $this->name
      */
     public function isNamed(): bool
@@ -169,6 +172,7 @@ final class Resolution
      * @return bool
      *
      * @phpstan-assert-if-true true $this->liminal
+     *
      * @phpstan-assert-if-false false $this->liminal
      */
     public function isLiminal(): bool
@@ -180,6 +184,7 @@ final class Resolution
      * @return bool
      *
      * @phpstan-assert-if-true !null $this->qualifier
+     *
      * @phpstan-assert-if-false null $this->qualifier
      */
     public function isQualified(): bool

@@ -17,7 +17,7 @@ class ResolverCatalogue
     private(set) array $resolvers;
 
     /**
-     * @var class-string<\Engine\Container\Contracts\Resolver<null>>
+     * @var class-string<Resolver<null>>
      */
     private(set) string $default;
 
@@ -28,7 +28,7 @@ class ResolverCatalogue
 
     /**
      * @param array<class-string<\Engine\Container\Contracts\Resolvable>, class-string<\Engine\Container\Contracts\Resolver<*>>> $resolvers
-     * @param class-string<\Engine\Container\Contracts\Resolver<null>>                                                           $default
+     * @param class-string<Resolver<null>> $default
      */
     public function __construct(array $resolvers, string $default)
     {
@@ -39,13 +39,13 @@ class ResolverCatalogue
     /**
      * Get the default resolver.
      *
-     * @param \Engine\Container\Container $container
+     * @param Container $container
      *
-     * @return \Engine\Container\Contracts\Resolver<null>
+     * @return Resolver<null>
      */
     public function default(Container $container): Resolver
     {
-        /** @var \Engine\Container\Contracts\Resolver<null> */
+        /** @var Resolver<null> */
         return $this->resolver($container, $this->default);
     }
 
@@ -54,14 +54,14 @@ class ResolverCatalogue
      *
      * @template TResolvable of \Engine\Container\Contracts\Resolvable
      *
-     * @param \Engine\Container\Container $container
-     * @param TResolvable                 $resolvable
+     * @param Container   $container
+     * @param TResolvable $resolvable
      *
-     * @return \Engine\Container\Contracts\Resolver<TResolvable>
+     * @return Resolver<TResolvable>
      */
     public function get(Container $container, Resolvable $resolvable): Resolver
     {
-        /** @var class-string<\Engine\Container\Contracts\Resolver<TResolvable>>|null $resolver */
+        /** @var class-string<Resolver<TResolvable>>|null $resolver */
         $resolver = $this->resolvers[$resolvable::class] ?? null;
 
         if ($resolver === null) {
@@ -77,8 +77,8 @@ class ResolverCatalogue
      * @template TResolvable of \Engine\Container\Contracts\Resolvable|null
      * @template TResolver of \Engine\Container\Contracts\Resolver<TResolvable>
      *
-     * @param \Engine\Container\Container $container
-     * @param class-string<TResolver>     $class
+     * @param Container               $container
+     * @param class-string<TResolver> $class
      *
      * @return TResolver
      */

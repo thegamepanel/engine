@@ -27,8 +27,8 @@ final class GenericResolver implements Resolver
      * @template TType of mixed
      *
      * @param \Engine\Container\Dependency<TType, *, null> $dependency
-     * @param \Engine\Container\Container                  $container
-     * @param array<string, mixed>                         $arguments
+     * @param Container            $container
+     * @param array<string, mixed> $arguments
      *
      * @return TType|(TType&object)|null
      */
@@ -53,16 +53,14 @@ final class GenericResolver implements Resolver
         /** @var \ReflectionType|null $type */
         $type = $dependency->type;
 
-        throw DependencyResolutionException::cannotResolve(($type?->__toString() ?? 'unknown'));
+        throw DependencyResolutionException::cannotResolve($type?->__toString() ?? 'unknown');
     }
 
     /**
      * @template TClass of object
      *
-     * @param \Engine\Container\Resolution<TClass>  $resolution
+     * @param Resolution<TClass> $resolution
      * @param \Engine\Container\Dependency<*, *, *> $dependency
-     *
-     * @return void
      */
     private function configureResolution(Resolution $resolution, Dependency $dependency): void
     {
@@ -84,14 +82,14 @@ final class GenericResolver implements Resolver
      *
      * @template TType of mixed
      *
-     * @param \ReflectionNamedType                      $type
+     * @param ReflectionNamedType $type
      * @param \Engine\Container\Dependency<TType, *, *> $dependency
-     * @param \Engine\Container\Container               $container
-     * @param array<string, mixed>                      $arguments
+     * @param Container            $container
+     * @param array<string, mixed> $arguments
      *
      * @return TType|(TType&object)|null
      */
-    protected function resolveSingleType(ReflectionNamedType $type, Dependency $dependency, Container $container, array $arguments = []): mixed
+    private function resolveSingleType(ReflectionNamedType $type, Dependency $dependency, Container $container, array $arguments = []): mixed
     {
         if (! class_exists($type->getName()) && ! interface_exists($type->getName())) {
             if ($dependency->hasDefault) {
@@ -107,7 +105,7 @@ final class GenericResolver implements Resolver
 
         $this->configureResolution(
             $resolution = Resolution::for($type->getName())->with($arguments),
-            $dependency
+            $dependency,
         );
 
         /** @var TType&object $instance */
@@ -121,16 +119,16 @@ final class GenericResolver implements Resolver
      *
      * @template TType of mixed
      *
-     * @param \ReflectionIntersectionType               $type
+     * @param ReflectionIntersectionType $type
      * @param \Engine\Container\Dependency<TType, *, *> $dependency
-     * @param \Engine\Container\Container               $container
-     * @param array<string, mixed>                      $arguments
+     * @param Container            $container
+     * @param array<string, mixed> $arguments
      *
      * @return (TType&object)|null
      */
-    protected function resolveIntersectionType(ReflectionIntersectionType $type, Dependency $dependency, Container $container, array $arguments = []): ?object
+    private function resolveIntersectionType(ReflectionIntersectionType $type, Dependency $dependency, Container $container, array $arguments = []): ?object
     {
-        /** @var array<\ReflectionNamedType> $types */
+        /** @var array<ReflectionNamedType> $types */
         $types    = $type->getTypes();
         $bindings = [];
         $classes  = [];
@@ -166,12 +164,12 @@ final class GenericResolver implements Resolver
                     $bindingClass = $binding->concrete;
                     $this->configureResolution(
                         $resolution = Resolution::for($bindingClass)->with($arguments),
-                        $dependency
+                        $dependency,
                     );
                     $instance = $container->resolve($resolution);
                 } else if ($binding->hasFactory()) {
                     $instance = $container->invoke(
-                        Invocation::callable($binding->factory)->with($arguments)
+                        Invocation::callable($binding->factory)->with($arguments),
                     );
                 } else {
                     // If we're here, this binding is a pass.
@@ -200,16 +198,16 @@ final class GenericResolver implements Resolver
      *
      * @template TType of mixed
      *
-     * @param \ReflectionUnionType                      $type
+     * @param ReflectionUnionType $type
      * @param \Engine\Container\Dependency<TType, *, *> $dependency
-     * @param \Engine\Container\Container               $container
-     * @param array<string, mixed>                      $arguments
+     * @param Container            $container
+     * @param array<string, mixed> $arguments
      *
      * @return TType|(TType&object)|null
      */
-    protected function resolveUnionType(ReflectionUnionType $type, Dependency $dependency, Container $container, array $arguments = []): mixed
+    private function resolveUnionType(ReflectionUnionType $type, Dependency $dependency, Container $container, array $arguments = []): mixed
     {
-        /** @var array<\ReflectionNamedType|\ReflectionIntersectionType> $types */
+        /** @var array<ReflectionNamedType|ReflectionIntersectionType> $types */
         $types           = $type->getTypes();
         $resolvableTypes = [];
 

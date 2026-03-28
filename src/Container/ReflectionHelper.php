@@ -79,13 +79,13 @@ final readonly class ReflectionHelper
      *
      * @param class-string<TClass>|TClass $class
      *
-     * @return \ReflectionClass<TClass>
+     * @return ReflectionClass<TClass>
      *
-     * @throws \Engine\Container\Exceptions\InvalidClassException
+     * @throws InvalidClassException
      *
      * @phpstan-ignore throws.unusedType
      */
-    public static function getClassReflector(string|object $class): ReflectionClass
+    public static function getClassReflector(object|string $class): ReflectionClass
     {
         try {
             return new ReflectionClass($class);
@@ -93,7 +93,7 @@ final readonly class ReflectionHelper
         } catch (ReflectionException $e) {
             throw InvalidClassException::make(
                 is_object($class) ? $class::class : $class,
-                $e
+                $e,
             );
         }
     }
@@ -104,11 +104,11 @@ final readonly class ReflectionHelper
      * @param class-string|object $class
      * @param string              $method
      *
-     * @return \ReflectionMethod
+     * @return ReflectionMethod
      *
-     * @throws \Engine\Container\Exceptions\InvalidMethodException
+     * @throws InvalidMethodException
      */
-    public static function getMethodReflector(string|object $class, string $method): ReflectionMethod
+    public static function getMethodReflector(object|string $class, string $method): ReflectionMethod
     {
         try {
             if ($class instanceof ReflectionClass) {
@@ -124,7 +124,7 @@ final readonly class ReflectionHelper
             throw InvalidMethodException::make(
                 $className,
                 $method,
-                $e
+                $e,
             );
         }
     }
@@ -134,7 +134,7 @@ final readonly class ReflectionHelper
      *
      * @param callable $function
      *
-     * @return \ReflectionFunction
+     * @return ReflectionFunction
      */
     public static function getFunctionReflector(callable $function): ReflectionFunction
     {
@@ -145,7 +145,7 @@ final readonly class ReflectionHelper
             // a valid Closure, so ReflectionFunction cannot fail here.
             throw InvalidFunctionException::make(
                 self::getFunctionName($function),
-                $e
+                $e,
             );
             // @codeCoverageIgnoreEnd
         }
@@ -189,19 +189,18 @@ final readonly class ReflectionHelper
      * @template TAttribute of object
      *
      * @param ReflectionClass<*>|ReflectionMethod|ReflectionFunction|ReflectionParameter $reflector
-     * @param class-string<TAttribute>                                                   $class
-     * @param bool                                                                       $instanceOf
+     * @param class-string<TAttribute> $class
+     * @param bool                     $instanceOf
      *
      * @return object|null
      *
      * @phpstan-return TAttribute|null
      */
     public static function getAttributeInstance(
-        ReflectionClass|ReflectionMethod|ReflectionFunction|ReflectionParameter $reflector,
+        ReflectionClass|ReflectionFunction|ReflectionMethod|ReflectionParameter $reflector,
         string                                                                  $class,
-        bool                                                                    $instanceOf = false
-    ): ?object
-    {
+        bool                                                                    $instanceOf = false,
+    ): ?object {
         $attribute = $reflector->getAttributes($class, $instanceOf ? ReflectionAttribute::IS_INSTANCEOF : 0)[0] ?? null;
 
         /** @var TAttribute|null $instance */

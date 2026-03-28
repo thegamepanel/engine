@@ -13,7 +13,8 @@ final class InvalidMethodException extends RuntimeException implements Container
     {
         return new self(sprintf(
             'The provided method %s::%s is not a valid method.',
-            $class, $method
+            $class,
+            $method,
         ), previous: $previous);
     }
 }

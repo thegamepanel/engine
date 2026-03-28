@@ -7,6 +7,7 @@ use Engine\Container\Attributes\Named;
 use Engine\Container\Bindings\Binding;
 use Engine\Container\Bindings\BindingCatalogue;
 use Engine\Container\Container;
+use Engine\Container\Contracts\Qualifier;
 use Engine\Container\Dependency;
 use Engine\Container\Exceptions\DependencyResolutionException;
 use Engine\Container\Resolvers\GenericResolver;
@@ -17,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Tests\Unit\Container\Fixtures\AbstractInterface;
 use Tests\Unit\Container\Fixtures\ClassWithAbstractUnionParam;
-use Tests\Unit\Container\Fixtures\ClassWithNullableAbstractUnionParam;
 use Tests\Unit\Container\Fixtures\ClassWithDependency;
 use Tests\Unit\Container\Fixtures\ClassWithDnfUnionParam;
 use Tests\Unit\Container\Fixtures\ClassWithIntersectionParam;
 use Tests\Unit\Container\Fixtures\ClassWithMethods;
 use Tests\Unit\Container\Fixtures\ClassWithMixedUnionParam;
 use Tests\Unit\Container\Fixtures\ClassWithMultiClassUnionParam;
+use Tests\Unit\Container\Fixtures\ClassWithNullableAbstractUnionParam;
 use Tests\Unit\Container\Fixtures\ClassWithNullableMultiClassUnionParam;
 use Tests\Unit\Container\Fixtures\ClassWithNullableScalarParam;
 use Tests\Unit\Container\Fixtures\ClassWithRequiredScalarParam;
@@ -33,59 +34,6 @@ use Tests\Unit\Container\Fixtures\TestQualifier;
 #[Group('unit'), Group('container'), Group('generic-resolver')]
 class GenericResolverTest extends TestCase
 {
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function buildContainer(Binding ...$bindings): Container
-    {
-        $map = [];
-
-        foreach ($bindings as $binding) {
-            $map[$binding->abstract] = $binding;
-        }
-
-        return new Container(
-            new ResolverCatalogue([], GenericResolver::class),
-            new BindingCatalogue($map, [], []),
-        );
-    }
-
-    private function dependencyFrom(
-        string $class,
-        string $paramName,
-        bool $hasDefault = false,
-        mixed $default = null,
-        bool $liminal = false,
-        ?Named $name = null,
-        ?\Engine\Container\Contracts\Qualifier $qualifier = null,
-    ): Dependency {
-        $constructor = (new ReflectionClass($class))->getConstructor();
-
-        if ($constructor === null) {
-            throw new \RuntimeException("$class has no constructor");
-        }
-
-        foreach ($constructor->getParameters() as $param) {
-            if ($param->getName() === $paramName) {
-                /** @var \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type */
-                $type = $param->getType();
-
-                return new Dependency(
-                    $param->getName(),
-                    $type,
-                    hasDefault: $hasDefault,
-                    default: $default,
-                    liminal: $liminal,
-                    name: $name,
-                    qualifier: $qualifier,
-                );
-            }
-        }
-
-        throw new \RuntimeException("Parameter '$paramName' not found on $class");
-    }
-
     // -------------------------------------------------------------------------
     // resolve() dispatch — no type
     // -------------------------------------------------------------------------
@@ -131,7 +79,7 @@ class GenericResolverTest extends TestCase
     #[Test]
     public function resolveWithNamedClassTypeResolvesViaContainer(): void
     {
-        $resolver   = new GenericResolver();
+        $resolver = new GenericResolver();
         // ClassWithDependency::$dependency is typed as ClassWithMethods — a named class type
         $dependency = $this->dependencyFrom(ClassWithDependency::class, 'dependency');
 
@@ -488,7 +436,7 @@ class GenericResolverTest extends TestCase
     #[Test]
     public function resolveIntersectionTypeIgnoresBindingWhenConcreteDoesNotExist(): void
     {
-        $resolver   = new GenericResolver();
+        $resolver = new GenericResolver();
         /** @var class-string $nonExistent */
         $nonExistent = 'NonExistentClass';
         $binding     = new Binding(\Stringable::class, concrete: $nonExistent);
@@ -536,8 +484,8 @@ class GenericResolverTest extends TestCase
     #[Test]
     public function resolveIntersectionTypeSkipsInvalidClassBindingAndResolvesNextValidBinding(): void
     {
-        $resolver    = new GenericResolver();
-        $instance    = new StringableCountable();
+        $resolver = new GenericResolver();
+        $instance = new StringableCountable();
         /** @var class-string $nonExistent */
         $nonExistent = 'NonExistentClass';
         $bad         = new Binding(\Stringable::class, concrete: $nonExistent);
@@ -564,5 +512,57 @@ class GenericResolverTest extends TestCase
         $this->expectException(DependencyResolutionException::class);
 
         $resolver->resolve($dependency, $this->buildContainer());
+    }
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function buildContainer(Binding ...$bindings): Container
+    {
+        $map = [];
+
+        foreach ($bindings as $binding) {
+            $map[$binding->abstract] = $binding;
+        }
+
+        return new Container(
+            new ResolverCatalogue([], GenericResolver::class),
+            new BindingCatalogue($map, [], []),
+        );
+    }
+
+    private function dependencyFrom(
+        string $class,
+        string $paramName,
+        bool $hasDefault = false,
+        mixed $default = null,
+        bool $liminal = false,
+        ?Named $name = null,
+        ?Qualifier $qualifier = null,
+    ): Dependency {
+        $constructor = new ReflectionClass($class)->getConstructor();
+
+        if ($constructor === null) {
+            throw new \RuntimeException("{$class} has no constructor");
+        }
+
+        foreach ($constructor->getParameters() as $param) {
+            if ($param->getName() === $paramName) {
+                /** @var \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type */
+                $type = $param->getType();
+
+                return new Dependency(
+                    $param->getName(),
+                    $type,
+                    hasDefault: $hasDefault,
+                    default: $default,
+                    liminal: $liminal,
+                    name: $name,
+                    qualifier: $qualifier,
+                );
+            }
+        }
+
+        throw new \RuntimeException("Parameter '{$paramName}' not found on {$class}");
     }
 }

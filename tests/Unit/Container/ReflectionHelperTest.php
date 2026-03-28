@@ -25,30 +25,6 @@ use Tests\Unit\Container\Fixtures\LazyClass;
 class ReflectionHelperTest extends TestCase
 {
     // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private function dependencyFrom(string $class, string $parameter): Dependency
-    {
-        $constructor = (new ReflectionClass($class))->getConstructor();
-
-        if ($constructor === null) {
-            throw new \RuntimeException("$class has no constructor");
-        }
-
-        foreach ($constructor->getParameters() as $param) {
-            if ($param->getName() === $parameter) {
-                /** @var \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type */
-                $type = $param->getType();
-
-                return new Dependency($param->getName(), $type);
-            }
-        }
-
-        throw new \RuntimeException("Parameter '$parameter' not found on $class");
-    }
-
-    // -------------------------------------------------------------------------
     // isSingleType
     // -------------------------------------------------------------------------
 
@@ -414,5 +390,28 @@ class ReflectionHelperTest extends TestCase
         $result = ReflectionHelper::getAttributeInstance($reflector, Lazy::class);
 
         $this->assertInstanceOf(Lazy::class, $result);
+    }
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private function dependencyFrom(string $class, string $parameter): Dependency
+    {
+        $constructor = new ReflectionClass($class)->getConstructor();
+
+        if ($constructor === null) {
+            throw new \RuntimeException("{$class} has no constructor");
+        }
+
+        foreach ($constructor->getParameters() as $param) {
+            if ($param->getName() === $parameter) {
+                /** @var \ReflectionNamedType|\ReflectionUnionType|\ReflectionIntersectionType|null $type */
+                $type = $param->getType();
+
+                return new Dependency($param->getName(), $type);
+            }
+        }
+
+        throw new \RuntimeException("Parameter '{$parameter}' not found on {$class}");
     }
 }

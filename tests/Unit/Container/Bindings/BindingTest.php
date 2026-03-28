@@ -55,8 +55,9 @@ class BindingTest extends TestCase
     #[Test]
     public function fromBuilderWithClassStringBinding(): void
     {
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))
-            ->to(ClassWithMethods::class);
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)
+            ->to(ClassWithMethods::class)
+        ;
 
         $binding = Binding::from($builder);
 
@@ -74,7 +75,7 @@ class BindingTest extends TestCase
     public function fromBuilderWithObjectBindingPassesThroughBothConcreteAndInstance(): void
     {
         $object  = new ConcreteClass();
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))->to($object);
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)->to($object);
 
         $binding = Binding::from($builder);
 
@@ -89,9 +90,10 @@ class BindingTest extends TestCase
     #[Test]
     public function fromBuilderIncludesConcreteInAliasesWhenConcreteIsSet(): void
     {
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)
             ->to(ClassWithMethods::class)
-            ->as(TestQualifier::class);
+            ->as(TestQualifier::class)
+        ;
 
         $binding = Binding::from($builder);
 
@@ -106,8 +108,9 @@ class BindingTest extends TestCase
     #[Test]
     public function fromBuilderDoesNotModifyAliasesWhenConcreteIsNotSet(): void
     {
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))
-            ->as(TestQualifier::class);
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)
+            ->as(TestQualifier::class)
+        ;
 
         $binding = Binding::from($builder);
 
@@ -122,8 +125,9 @@ class BindingTest extends TestCase
     public function fromBuilderWithFactory(): void
     {
         $factory = static fn () => new ClassWithMethods();
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))
-            ->using($factory);
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)
+            ->using($factory)
+        ;
 
         $binding = Binding::from($builder);
 
@@ -167,7 +171,7 @@ class BindingTest extends TestCase
     #[Test]
     public function fromBuilderTransfersLiminalFlag(): void
     {
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))->liminal();
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)->liminal();
 
         $this->assertTrue(Binding::from($builder)->liminal);
     }
@@ -179,7 +183,7 @@ class BindingTest extends TestCase
     #[Test]
     public function fromBuilderTransfersLazilyFlag(): void
     {
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))->lazily();
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)->lazily();
 
         $this->assertTrue(Binding::from($builder)->lazily);
     }
@@ -191,7 +195,7 @@ class BindingTest extends TestCase
     #[Test]
     public function fromBuilderTransfersSharedFlag(): void
     {
-        $builder = (new BindingBuilder('my-scope', ClassWithMethods::class))->notShared();
+        $builder = new BindingBuilder('my-scope', ClassWithMethods::class)->notShared();
 
         $this->assertFalse(Binding::from($builder)->shared);
     }
