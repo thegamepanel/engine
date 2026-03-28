@@ -15,7 +15,7 @@ final class Invocation
     /**
      * @param callable $function
      *
-     * @return self
+     * @return static
      */
     public static function callable(callable $function): self
     {
