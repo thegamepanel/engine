@@ -7,7 +7,7 @@ use Engine\Container\Attributes\NoResolution;
 use Engine\Container\Contracts\ContainerException;
 use InvalidArgumentException;
 
-class UnresolvableClassException extends InvalidArgumentException implements ContainerException
+final class UnresolvableClassException extends InvalidArgumentException implements ContainerException
 {
     public static function make(string $class): self
     {
