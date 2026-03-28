@@ -15,10 +15,13 @@ final class InvalidInvocationException extends InvalidArgumentException implemen
         );
     }
 
-    public static function alreadyInitialised(string $class): self
+    public static function notCallable(): self
     {
-        return new self(
-            sprintf('Cannot call the constructor of %s because it is already initialised.', $class)
-        );
+        return new self('Cannot invoke a non-callable.');
+    }
+
+    public static function notMethod(): self
+    {
+        return new self('Cannot invoke a non-string method.');
     }
 }

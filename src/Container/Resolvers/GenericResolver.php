@@ -59,12 +59,12 @@ final class GenericResolver implements Resolver
     /**
      * @template TClass of object
      *
-     * @param \Engine\Container\Resolution<TClass>       $resolution
+     * @param \Engine\Container\Resolution<TClass>  $resolution
      * @param \Engine\Container\Dependency<*, *, *> $dependency
      *
-     * @return \Engine\Container\Resolution<TClass>
+     * @return void
      */
-    private function configureResolution(Resolution $resolution, Dependency $dependency): Resolution
+    private function configureResolution(Resolution $resolution, Dependency $dependency): void
     {
         if ($dependency->name !== null) {
             $resolution->named($dependency->name->name);
@@ -77,8 +77,6 @@ final class GenericResolver implements Resolver
         if ($dependency->liminal) {
             $resolution->liminal();
         }
-
-        return $resolution;
     }
 
     /**
@@ -107,11 +105,13 @@ final class GenericResolver implements Resolver
             throw DependencyResolutionException::cannotResolve($type->getName());
         }
 
-        /** @var TType&object $instance */
-        $instance = $container->resolve($this->configureResolution(
-            Resolution::for($type->getName())->with($arguments),
+        $this->configureResolution(
+            $resolution = Resolution::for($type->getName())->with($arguments),
             $dependency
-        ));
+        );
+
+        /** @var TType&object $instance */
+        $instance = $container->resolve($resolution);
 
         return $instance;
     }
@@ -164,10 +164,11 @@ final class GenericResolver implements Resolver
                 } else if ($binding->concrete !== null) {
                     /** @var class-string $bindingClass */
                     $bindingClass = $binding->concrete;
-                    $instance     = $container->resolve($this->configureResolution(
-                        Resolution::for($bindingClass)->with($arguments),
+                    $this->configureResolution(
+                        $resolution = Resolution::for($bindingClass)->with($arguments),
                         $dependency
-                    ));
+                    );
+                    $instance = $container->resolve($resolution);
                 } else if ($binding->hasFactory()) {
                     $instance = $container->invoke(
                         Invocation::callable($binding->factory)->with($arguments)

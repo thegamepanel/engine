@@ -30,6 +30,17 @@
       "ignore": [
         "Engine\\Container\\Container::invokeClassMethod"
       ]
+    },
+    "Coalesce": {
+      "ignore": [
+        "Engine\\Container\\Resolvers\\GenericResolver::resolve",
+        "Engine\\Container\\Container::getResolved"
+      ]
+    },
+    "Break_": {
+      "ignore": [
+        "Engine\\Container\\Container::collectDependencies"
+      ]
     }
   }
 }

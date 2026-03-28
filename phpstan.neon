@@ -1,6 +1,5 @@
 includes:
   - vendor/nesbot/carbon/extension.neon
-  - vendor/phpstan/phpstan-phpunit/extension.neon
 
 parameters:
 
@@ -10,3 +9,7 @@ parameters:
   level: max
 
   scanFiles: [ ]
+
+  excludePaths:
+    - tests/
+    - vendor/

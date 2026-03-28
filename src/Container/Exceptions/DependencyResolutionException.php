@@ -43,4 +43,11 @@ final class DependencyResolutionException extends RuntimeException implements Co
             'Cannot create a ghost object for "%s".', $type
         ));
     }
+
+    public static function namedAndQualified(): self
+    {
+        return new self(
+            'Cannot resolve a dependency using both a name and a qualifier.'
+        );
+    }
 }

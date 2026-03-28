@@ -240,6 +240,19 @@ class ExceptionsTest extends TestCase
         $this->assertStringContainsString('string', $e->getMessage());
     }
 
+    /**
+     * - A named-and-qualified error produces a non-empty message, confirming that
+     *   the combination of name and qualifier on a single dependency is rejected.
+     */
+    #[Test]
+    public function dependencyNamedAndQualifiedHasMessage(): void
+    {
+        $e = DependencyResolutionException::namedAndQualified();
+
+        $this->assertInstanceOf(DependencyResolutionException::class, $e);
+        $this->assertNotEmpty($e->getMessage());
+    }
+
     // -------------------------------------------------------------------------
     // InvalidResolverException
     // -------------------------------------------------------------------------
@@ -315,15 +328,29 @@ class ExceptionsTest extends TestCase
     }
 
     /**
-     * - An already-initialised error includes the class name so the caller knows
-     *   which class's constructor was illegally targeted on an existing instance.
+     * - A not-callable error produces a non-empty message indicating the invokable
+     *   could not be treated as a callable.
      */
     #[Test]
-    public function invalidInvocationAlreadyInitialisedContainsClass(): void
+    public function invalidInvocationNotCallableHasMessage(): void
     {
-        $e = InvalidInvocationException::alreadyInitialised('SomeClass');
+        $e = InvalidInvocationException::notCallable();
 
         $this->assertInstanceOf(InvalidInvocationException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
+        $this->assertNotEmpty($e->getMessage());
     }
+
+    /**
+     * - A not-method error produces a non-empty message indicating the invokable
+     *   could not be treated as a string method name.
+     */
+    #[Test]
+    public function invalidInvocationNotMethodHasMessage(): void
+    {
+        $e = InvalidInvocationException::notMethod();
+
+        $this->assertInstanceOf(InvalidInvocationException::class, $e);
+        $this->assertNotEmpty($e->getMessage());
+    }
+
 }

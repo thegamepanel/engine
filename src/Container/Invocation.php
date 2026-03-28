@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace Engine\Container;
 
 /**
+ * Invocation
+ * ----------
  *
+ * Represents a deferred invocation of a callable, class method, or constructor,
+ * with optional pre-supplied arguments for dependency injection.
  */
 final class Invocation
 {
