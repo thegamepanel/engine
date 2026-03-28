@@ -1,0 +1,21 @@
+name: Code Style
+
+on: [ pull_request ]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up php 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+
+      - name: Install dependencies
+        run: composer self-update && composer install && composer dump-autoload
+
+      - name: Check code style
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
