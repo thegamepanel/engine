@@ -12,7 +12,7 @@ final class MissingEnvVariableException extends RuntimeException implements Conf
     {
         return new self(sprintf(
             'The environment variable "%s" is missing.',
-            $variable
+            $variable,
         ));
     }
 }

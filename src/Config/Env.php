@@ -18,14 +18,12 @@ final class Env
     /**
      * The singleton instance.
      *
-     * @var \Engine\Config\Env|null
+     * @var Env|null
      */
     private static ?self $instance = null;
 
     /**
      * Create an instance from the superglobal.
-     *
-     * @return void
      */
     public static function createFromSuperglobal(): void
     {
@@ -39,8 +37,6 @@ final class Env
      * Create an instance from an env file.
      *
      * @param string $path
-     *
-     * @return void
      */
     public static function createFromFile(string $path): void
     {
@@ -50,15 +46,6 @@ final class Env
         $values = $dotenv->load();
 
         self::$instance = new self($values);
-    }
-
-    /**
-     * @param array<string, string|int|float|bool|null> $values
-     */
-    private function __construct(
-        private readonly array $values = []
-    )
-    {
     }
 
     /**
@@ -72,7 +59,7 @@ final class Env
      *
      * @return string|int|float|bool|null
      */
-    public static function get(string $key, string|int|float|bool|null $default = null): string|int|float|bool|null
+    public static function get(string $key, bool|float|int|string|null $default = null): bool|float|int|string|null
     {
         return self::$instance->values[$key] ?? $default;
     }
@@ -114,7 +101,7 @@ final class Env
         $value = self::get($key, $default);
 
         if (is_string($value) || is_numeric($value) || is_bool($value)) {
-            return (string)$value;
+            return (string) $value;
         }
 
         return $default;
@@ -136,14 +123,14 @@ final class Env
      *
      * @return (TDefault is int ? int : null)
      *
-     * @throws \Engine\Config\Exceptions\InvalidEnvException
+     * @throws InvalidEnvException
      */
     public static function int(string $key, ?int $default = null): ?int
     {
         $value = self::get($key, $default);
 
         if (is_int($value) || is_numeric($value) || is_bool($value)) {
-            return (int)$value;
+            return (int) $value;
         }
 
         if ($value === null) {
@@ -174,7 +161,7 @@ final class Env
         $value = self::get($key, $default);
 
         if (is_float($value) || is_numeric($value) || is_bool($value)) {
-            return (float)$value;
+            return (float) $value;
         }
 
         if ($value === null) {
@@ -218,14 +205,14 @@ final class Env
         $value = self::get($key, $default);
 
         if (is_bool($value) || is_int($value)) {
-            return (bool)$value;
+            return (bool) $value;
         }
 
         if (is_string($value)) {
             return match ($value) {
                 'true', '1', 'yes' => true,
                 'false', '0', 'no' => false,
-                default            => throw InvalidEnvException::make($key, 'bool')
+                default => throw InvalidEnvException::make($key, 'bool'),
             };
         }
 
@@ -242,11 +229,17 @@ final class Env
      * Sets the instance to <code>null</code> which effectively removes the
      * env variables from memory, unless they were loaded using the
      * <code>$_ENV</code> superglobal.
-     *
-     * @return void
      */
     public static function destroy(): void
     {
         self::$instance = null;
+    }
+
+    /**
+     * @param array<string, string|int|float|bool|null> $values
+     */
+    private function __construct(
+        private readonly array $values = [],
+    ) {
     }
 }

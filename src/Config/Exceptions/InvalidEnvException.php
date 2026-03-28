@@ -12,7 +12,8 @@ final class InvalidEnvException extends RuntimeException implements ConfigExcept
     {
         return new self(sprintf(
             'The environment variable "%s" must be of type %s, or castable to it.',
-            $variable, $type
+            $variable,
+            $type,
         ));
     }
 }

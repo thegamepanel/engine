@@ -5,17 +5,14 @@ namespace Engine\Config;
 
 use Engine\Config\Contracts\ConfigObject;
 
-/**
- *
- */
 final readonly class ConfigRegistry
 {
     /**
      * Create a map of class names to their module and config name.
      *
-     * @param array<string, array<string, \Engine\Config\Contracts\ConfigObject>> $config
+     * @param array<string, array<string, ConfigObject>> $config
      *
-     * @return array<class-string<\Engine\Config\Contracts\ConfigObject>, array{module: string, config: string}>
+     * @return array<class-string<ConfigObject>, array{module: string, config: string}>
      */
     private static function mapConfigToClassMappings(array $config): array
     {
@@ -34,26 +31,25 @@ final readonly class ConfigRegistry
     }
 
     /**
-     * The loaded config.
-     *
-     * @var array<string, array<string, \Engine\Config\Contracts\ConfigObject>>
-     */
-    private array $config;
-
-    /**
      * A map of config object class names to their config details.
      *
-     * @var array<class-string<\Engine\Config\Contracts\ConfigObject>, array{module: string, config: string}>
+     * @var array<class-string<ConfigObject>, array{module: string, config: string}>
      */
     public array $classMappings;
 
     /**
-     * @param array<string, array<string, \Engine\Config\Contracts\ConfigObject>> $config
+     * The loaded config.
+     *
+     * @var array<string, array<string, ConfigObject>>
+     */
+    private array $config;
+
+    /**
+     * @param array<string, array<string, ConfigObject>> $config
      */
     public function __construct(
         array $config,
-    )
-    {
+    ) {
         $this->config        = $config;
         $this->classMappings = self::mapConfigToClassMappings($config);
     }
@@ -79,7 +75,7 @@ final readonly class ConfigRegistry
      * @param string $module
      * @param string $config
      *
-     * @return \Engine\Config\Contracts\ConfigObject|null
+     * @return ConfigObject|null
      */
     public function get(string $module, string $config): ?ConfigObject
     {
@@ -89,9 +85,9 @@ final readonly class ConfigRegistry
     /**
      * Get a config object by its class.
      *
-     * @param class-string<\Engine\Config\Contracts\ConfigObject> $class
+     * @param class-string<ConfigObject> $class
      *
-     * @return \Engine\Config\Contracts\ConfigObject|null
+     * @return ConfigObject|null
      */
     public function for(string $class): ?ConfigObject
     {
