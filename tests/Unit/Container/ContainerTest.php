@@ -10,6 +10,8 @@ use Engine\Container\Bindings\BindingCatalogue;
 use Engine\Container\Container;
 use Engine\Container\Exceptions\DependencyResolutionException;
 use Engine\Container\Exceptions\InvalidInvocationException;
+use Engine\Container\Exceptions\NotInstantiableException;
+use Engine\Container\Exceptions\UnresolvableClassException;
 use Engine\Container\Invocation;
 use Engine\Container\Resolution;
 use Engine\Container\Resolvers\GenericResolver;
@@ -27,11 +29,20 @@ use Tests\Unit\Container\Fixtures\ClassWithGhostScalarDependency;
 use Tests\Unit\Container\Fixtures\ClassWithLiminalDependency;
 use Tests\Unit\Container\Fixtures\ClassWithMethods;
 use Tests\Unit\Container\Fixtures\ClassWithMultipleDependencies;
+use Tests\Unit\Container\Fixtures\ClassWithNamedAndQualifiedDependency;
+use Tests\Unit\Container\Fixtures\ClassWithNamedDependency;
+use Tests\Unit\Container\Fixtures\ClassWithNoResolution;
+use Tests\Unit\Container\Fixtures\ClassWithPrivateMethod;
 use Tests\Unit\Container\Fixtures\ClassWithProperty;
 use Tests\Unit\Container\Fixtures\ClassWithScalarDefault;
+use Tests\Unit\Container\Fixtures\AnotherTestQualifier;
+use Tests\Unit\Container\Fixtures\ClassWithMixedParams;
+use Tests\Unit\Container\Fixtures\TaggedQualifier;
+use Tests\Unit\Container\Fixtures\ClassWithVariadicParam;
 use Tests\Unit\Container\Fixtures\ConcreteClass;
 use Tests\Unit\Container\Fixtures\LazyClass;
 use Tests\Unit\Container\Fixtures\LiminalClass;
+use Tests\Unit\Container\Fixtures\TestQualifier;
 
 #[Group('unit'), Group('container')]
 class ContainerTest extends TestCase
@@ -549,19 +560,312 @@ class ContainerTest extends TestCase
         $this->assertFalse($result);
     }
 
+
+    // -------------------------------------------------------------------------
+    // Named and qualified binding resolution
+    // -------------------------------------------------------------------------
+
     /**
-     * - Invoking a constructor call on an uninitialized lazy proxy throws
-     *   `InvalidInvocationException`, because calling the constructor on an already
-     *   allocated lazy object is not permitted.
+     * - A named binding is resolved and cached under its name, so a second resolution
+     *   with the same name returns the exact same instance rather than creating a new one.
      */
     #[Test]
-    public function invokeConstructorOnUninitializedProxyThrowsInvalidInvocationException(): void
+    public function resolveWithNamedBindingCachesAndReturnsNamedInstance(): void
+    {
+        $namedInstance = new ClassWithMethods();
+        $namedBinding  = new Binding(ClassWithMethods::class, instance: $namedInstance);
+        $mainBinding   = new Binding(ClassWithMethods::class, namedMap: ['primary' => $namedBinding]);
+        $container     = $this->buildContainerWith($mainBinding);
+
+        $first  = $container->resolve(Resolution::for(ClassWithMethods::class)->named('primary'));
+        $second = $container->resolve(Resolution::for(ClassWithMethods::class)->named('primary'));
+
+        $this->assertSame($namedInstance, $first);
+        $this->assertSame($first, $second);
+    }
+
+    /**
+     * - A qualified binding is resolved and cached under its qualifier, so a second
+     *   resolution with the same qualifier returns the exact same instance.
+     */
+    #[Test]
+    public function resolveWithQualifiedBindingCachesAndReturnsQualifiedInstance(): void
+    {
+        $qualifier      = new TestQualifier();
+        $qualInstance   = new ClassWithMethods();
+        $qualBinding    = new Binding(ClassWithMethods::class, instance: $qualInstance);
+        $mainBinding    = new Binding(ClassWithMethods::class, qualifiedMap: [TestQualifier::class => $qualBinding]);
+        $container      = $this->buildContainerWith($mainBinding);
+
+        $first  = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier));
+        $second = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier));
+
+        $this->assertSame($qualInstance, $first);
+        $this->assertSame($first, $second);
+    }
+
+    /**
+     * - Auto-wiring a class whose constructor has a #[Named] parameter retrieves
+     *   the correctly named binding from the container rather than the default one.
+     */
+    #[Test]
+    public function resolveClassWithNamedDependencyRetrievesNamedBinding(): void
+    {
+        $namedInstance = new ClassWithMethods();
+        $namedBinding  = new Binding(ClassWithMethods::class, instance: $namedInstance);
+        $mainBinding   = new Binding(ClassWithMethods::class, namedMap: ['primary' => $namedBinding]);
+        $container     = $this->buildContainerWith($mainBinding);
+
+        $result = $container->resolve(Resolution::for(ClassWithNamedDependency::class));
+
+        $this->assertSame($namedInstance, $result->dep);
+    }
+
+    // -------------------------------------------------------------------------
+    // Error paths in resolve()
+    // -------------------------------------------------------------------------
+
+    /**
+     * - A constructor parameter bearing both a #[Named] and a qualifier attribute is
+     *   invalid; the container throws a DependencyResolutionException rather than
+     *   attempting to resolve by one or the other arbitrarily.
+     */
+    #[Test]
+    public function resolveClassWithNamedAndQualifiedDependencyThrowsDependencyResolutionException(): void
     {
         $container = $this->buildContainer();
-        $proxy     = $container->resolve(Resolution::for(ClassWithProperty::class)->lazily());
+
+        $this->expectException(DependencyResolutionException::class);
+
+        $container->resolve(Resolution::for(ClassWithNamedAndQualifiedDependency::class));
+    }
+
+    /**
+     * - Resolving a class decorated with #[NoResolution] throws an
+     *   UnresolvableClassException even though the class is otherwise valid,
+     *   preventing accidental auto-wiring of classes that must not be instantiated.
+     */
+    #[Test]
+    public function resolveClassWithNoResolutionAttributeThrowsUnresolvableClassException(): void
+    {
+        $container = $this->buildContainer();
+
+        $this->expectException(UnresolvableClassException::class);
+
+        $container->resolve(Resolution::for(ClassWithNoResolution::class));
+    }
+
+    /**
+     * - Resolving an interface that has no binding and cannot be instantiated throws
+     *   a NotInstantiableException, surfacing a clear error instead of a generic
+     *   PHP reflection failure.
+     */
+    #[Test]
+    public function resolveNonInstantiableClassWithoutBindingThrowsNotInstantiableException(): void
+    {
+        $container = $this->buildContainer();
+
+        $this->expectException(NotInstantiableException::class);
+
+        $container->resolve(Resolution::for(AbstractInterface::class));
+    }
+
+    // -------------------------------------------------------------------------
+    // Error paths in invoke()
+    // -------------------------------------------------------------------------
+
+    /**
+     * - Invoking a non-public method throws an InvalidInvocationException, preventing
+     *   the container from bypassing visibility rules via reflection.
+     */
+    #[Test]
+    public function invokeNonPublicMethodThrowsInvalidInvocationException(): void
+    {
+        $container = $this->buildContainer();
 
         $this->expectException(InvalidInvocationException::class);
 
-        $container->invoke(Invocation::constructor($proxy));
+        $container->invoke(Invocation::method(ClassWithPrivateMethod::class, 'secretMethod'));
+    }
+
+    /**
+     * - Invoking a static method via a class name string returns the method's return
+     *   value without needing an object instance to be resolved first.
+     */
+    #[Test]
+    public function invokeStaticMethodReturnsResult(): void
+    {
+        $container = $this->buildContainer();
+
+        $result = $container->invoke(Invocation::method(ClassWithMethods::class, 'callableStaticMethod'));
+
+        $this->assertTrue($result);
+    }
+
+    /**
+     * - Invoking a non-static, non-constructor method with only a class name string
+     *   causes the container to resolve an instance of that class first, then call
+     *   the method on it.
+     */
+    #[Test]
+    public function invokeInstanceMethodWithClassStringResolvesObjectFirst(): void
+    {
+        $container = $this->buildContainer();
+
+        $result = $container->invoke(Invocation::method(ClassWithMethods::class, 'callableMethod'));
+
+        $this->assertFalse($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // collectDependencies
+    // -------------------------------------------------------------------------
+
+    /**
+     * - When a named argument matching a constructor parameter is passed to an
+     *   invocation, the container uses that value directly rather than attempting
+     *   to resolve the parameter from its type.
+     */
+    #[Test]
+    public function invokeWithPreSuppliedArgumentUsesItDirectly(): void
+    {
+        $container = $this->buildContainer();
+
+        $result = $container->invoke(
+            Invocation::constructor(ClassWithScalarDefault::class)->with(['name' => 'custom'])
+        );
+
+        $this->assertSame('custom', $result->name);
+    }
+
+    /**
+     * - When a constructor has a variadic parameter, the container stops collecting
+     *   dependencies at that point rather than attempting to resolve the variadic,
+     *   allowing the class to be instantiated with the variadic left empty.
+     */
+    #[Test]
+    public function resolveClassWithVariadicParameterStopsBeforeVariadic(): void
+    {
+        $container = $this->buildContainer();
+
+        $result = $container->resolve(Resolution::for(ClassWithVariadicParam::class));
+
+        $this->assertInstanceOf(ClassWithMethods::class, $result->first);
+    }
+
+    /**
+     * - When a named binding is marked as shared and has no fixed instance, the
+     *   container creates the instance on first resolution and stores it in the
+     *   named instance cache so that a second resolution with the same name returns
+     *   the exact same object.
+     */
+    #[Test]
+    public function resolveWithSharedNamedBindingCachesInstance(): void
+    {
+        $namedBinding = new Binding(ClassWithMethods::class, shared: true);
+        $mainBinding  = new Binding(ClassWithMethods::class, namedMap: ['primary' => $namedBinding]);
+        $container    = $this->buildContainerWith($mainBinding);
+
+        $first  = $container->resolve(Resolution::for(ClassWithMethods::class)->named('primary'));
+        $second = $container->resolve(Resolution::for(ClassWithMethods::class)->named('primary'));
+
+        $this->assertSame($first, $second);
+    }
+
+    /**
+     * - A qualified resolution that finds no cached entry must not fall through to the
+     *   shared instance store; the container must produce a fresh object distinct from
+     *   any previously cached non-qualified instance of the same class.
+     */
+    #[Test]
+    public function resolveWithQualifiedResolutionDoesNotReturnNonQualifiedSharedInstance(): void
+    {
+        $qualifier    = new TestQualifier();
+        $qualBinding  = new Binding(ClassWithMethods::class, shared: true);
+        $mainBinding  = new Binding(ClassWithMethods::class, shared: true, qualifiedMap: [TestQualifier::class => $qualBinding]);
+        $container    = $this->buildContainerWith($mainBinding);
+
+        $shared    = $container->resolve(Resolution::for(ClassWithMethods::class));
+        $qualified = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier));
+
+        $this->assertNotSame($shared, $qualified);
+    }
+
+    /**
+     * - When two different qualifier types are both stored in the qualified instance
+     *   cache, resolving with each qualifier returns the correct instance for that
+     *   qualifier and not the one registered under the other qualifier.
+     */
+    #[Test]
+    public function resolveWithQualifiedResolutionReturnsInstanceForCorrectQualifier(): void
+    {
+        $qualifier1  = new TestQualifier();
+        $qualifier2  = new AnotherTestQualifier();
+        $q1Binding   = new Binding(ClassWithMethods::class, shared: true);
+        $q2Binding   = new Binding(ClassWithMethods::class, shared: true);
+        $mainBinding = new Binding(ClassWithMethods::class, qualifiedMap: [
+            TestQualifier::class        => $q1Binding,
+            AnotherTestQualifier::class => $q2Binding,
+        ]);
+        $container = $this->buildContainerWith($mainBinding);
+
+        $instance1 = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier1));
+        $instance2 = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier2));
+        $cached1   = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier1));
+        $cached2   = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifier2));
+
+        $this->assertNotSame($instance1, $instance2);
+        $this->assertSame($instance1, $cached1);
+        $this->assertSame($instance2, $cached2);
+    }
+
+    /**
+     * - When two qualified instances of the same qualifier class but with different
+     *   tag values are cached, resolving with a specific tag must return only the
+     *   matching instance. This verifies that both the class identity check (===) AND
+     *   the equals() check are required: using || instead of && would cause the first
+     *   cached entry (tag 'a') to be returned for any TaggedQualifier regardless of tag.
+     */
+    #[Test]
+    public function resolveWithQualifiedResolutionUsesEqualityCheckNotJustClassCheck(): void
+    {
+        $qualifierA  = new TaggedQualifier('a');
+        $qualifierB  = new TaggedQualifier('b');
+        // A single binding slot for TaggedQualifier::class — both 'a' and 'b' resolve
+        // through it, creating distinct shared instances stored under their respective
+        // qualifier instances.
+        $tagBinding  = new Binding(ClassWithMethods::class, shared: true);
+        $mainBinding = new Binding(ClassWithMethods::class, qualifiedMap: [
+            TaggedQualifier::class => $tagBinding,
+        ]);
+        $container = $this->buildContainerWith($mainBinding);
+
+        // Prime the cache with qualifier 'a' — stored as [TaggedQualifier('a'), instanceA].
+        $instanceA = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifierA));
+
+        // Resolve with qualifier 'b'. The cache loop encounters TaggedQualifier('a'):
+        // with &&  (correct): class matches but equals('b')=false → skip → no hit → fresh instance
+        // with ||  (mutant) : class matches → OR short-circuits   → returns instanceA (wrong!)
+        $instanceB = $container->resolve(Resolution::for(ClassWithMethods::class)->qualifiedBy($qualifierB));
+
+        $this->assertNotSame($instanceA, $instanceB);
+    }
+
+    /**
+     * - When a named argument matching the first constructor parameter is pre-supplied,
+     *   the container must continue collecting and auto-wiring the remaining parameters
+     *   rather than stopping at the first pre-supplied argument.
+     */
+    #[Test]
+    public function invokeWithPreSuppliedFirstArgumentStillResolvesRemainingParameters(): void
+    {
+        $container = $this->buildContainer();
+
+        $result = $container->invoke(
+            Invocation::constructor(ClassWithMixedParams::class)->with(['name' => 'hello'])
+        );
+
+        $this->assertSame('hello', $result->name);
+        $this->assertInstanceOf(ClassWithMethods::class, $result->dep);
     }
 }

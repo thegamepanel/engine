@@ -11,6 +11,7 @@ use Engine\Container\Bindings\BindingCatalogue;
 use Engine\Container\Contracts\Qualifier;
 use Engine\Container\Contracts\Resolvable;
 use Engine\Container\Contracts\Resolver;
+use Engine\Container\Exceptions\DependencyResolutionException;
 use Engine\Container\Exceptions\InvalidInvocationException;
 use Engine\Container\Exceptions\MethodCallException;
 use Engine\Container\Exceptions\NotInstantiableException;
@@ -19,7 +20,6 @@ use Engine\Container\Resolvers\ResolverCatalogue;
 use ReflectionException;
 use ReflectionFunctionAbstract;
 use ReflectionParameter;
-use RuntimeException;
 use WeakReference;
 
 final class Container
@@ -77,12 +77,12 @@ final class Container
     {
         if ($resolution->isNamed()) {
             /** @var TClass|null */
-            return $this->namedInstances[$resolution->class][$resolution->name];
+            return $this->namedInstances[$resolution->class][$resolution->name] ?? null;
         }
 
         if ($resolution->isQualified()) {
             /** @var array{\Engine\Container\Contracts\Qualifier, object} $instances */
-            $instances = $this->qualifiedInstances[$resolution->class];
+            $instances = $this->qualifiedInstances[$resolution->class] ?? [];
 
             /**
              * @var \Engine\Container\Contracts\Qualifier $qualifier
@@ -141,11 +141,11 @@ final class Container
      * @param \Engine\Container\Resolution<TClass>            $resolution
      * @param \Engine\Container\Bindings\Binding<TClass>|null $binding
      * @param TClass                                          $instance
-     * @param bool|int                                        $liminal
+     * @param bool                                            $liminal
      *
      * @return TClass
      */
-    private function storeResolved(Resolution $resolution, ?Bindings\Binding $binding, object $instance, bool|int $liminal): object
+    private function storeResolved(Resolution $resolution, ?Bindings\Binding $binding, object $instance, bool $liminal): object
     {
         $class = $binding->abstract ?? $resolution->class;
 
@@ -245,7 +245,7 @@ final class Container
 
             // Finally, if the liminal flag isn't already set, we set it based
             // on the presence of the Liminal attribute.
-            $liminal |= ReflectionHelper::getAttributeInstance($reflector, Liminal::class) !== null;
+            $liminal = $liminal || (ReflectionHelper::getAttributeInstance($reflector, Liminal::class) !== null);
         }
 
         /**
@@ -271,7 +271,7 @@ final class Container
 
             // Make sure that it's actually callable.
             if (! is_callable($callable)) { // @codeCoverageIgnoreStart
-                throw new RuntimeException('Cannot invoke non-callable');
+                throw InvalidInvocationException::notCallable();
             } // @codeCoverageIgnoreEnd
 
             return $this->invokeCallable($callable, $invocation->arguments);
@@ -283,7 +283,7 @@ final class Container
 
         // Make sure we're dealing with a proper method.
         if (! is_string($method)) { // @codeCoverageIgnoreStart
-            throw new RuntimeException('Cannot invoke non-string method');
+            throw InvalidInvocationException::notMethod();
         } // @codeCoverageIgnoreEnd
 
         // If the class is an object, we're calling a method on it.
@@ -327,12 +327,6 @@ final class Container
         // If it's not public, we can't call it.
         if ($methodReflector->isPublic() === false) {
             throw InvalidInvocationException::notPublic($class, $method);
-        }
-
-        // If it's a constructor, and we've been given an object that isn't an
-        // uninitialized lazy object, we can't call it.
-        if (is_object($object) && $methodReflector->isConstructor() && $classReflector->isUninitializedLazyObject($object)) {
-            throw InvalidInvocationException::alreadyInitialised($class);
         }
 
         $dependencies = $this->collectDependencies($methodReflector, $invocation->arguments);
@@ -425,7 +419,7 @@ final class Container
             $type,
             $parameter->isOptional(),
             ReflectionHelper::getAttributeInstance($parameter, Named::class),
-            ReflectionHelper::getAttributeInstance($parameter, Qualifier::class),
+            ReflectionHelper::getAttributeInstance($parameter, Qualifier::class, true),
             ReflectionHelper::getAttributeInstance($parameter, Resolvable::class, true),
             $parameter->isDefaultValueAvailable(),
             $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null,
@@ -446,6 +440,11 @@ final class Container
      */
     private function resolveDependency(Dependency $dependency): mixed
     {
+        // If there's both a name, and a qualifier, we can't resolve it.
+        if ($dependency->name !== null && $dependency->qualifier !== null) {
+            throw DependencyResolutionException::namedAndQualified();
+        }
+
         return $this->getDependencyResolver($dependency)->resolve($dependency, $this);
     }
 
