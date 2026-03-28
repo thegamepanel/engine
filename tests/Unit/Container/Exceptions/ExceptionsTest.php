@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Container\Exceptions;
 
+use Engine\Container\Attributes\NoResolution;
 use Engine\Container\Exceptions\BindingNotFoundException;
 use Engine\Container\Exceptions\DependencyResolutionException;
 use Engine\Container\Exceptions\InvalidClassException;
@@ -25,46 +26,39 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - A binding lookup failure for a plain class produces a message identifying
-     *   the class that could not be found.
+     * - A binding lookup failure for a plain class produces the expected message.
      */
     #[Test]
-    public function bindingNotFoundForClassContainsClassName(): void
+    public function bindingNotFoundForClassProducesExpectedMessage(): void
     {
         $e = BindingNotFoundException::class('SomeClass');
 
         $this->assertInstanceOf(BindingNotFoundException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
+        $this->assertSame('No binding found for SomeClass', $e->getMessage());
     }
 
     /**
-     * - A named binding lookup failure produces a message containing both the
-     *   class name and the binding name so the caller can identify the exact
-     *   missing configuration.
+     * - A named binding lookup failure produces the expected message.
      */
     #[Test]
-    public function bindingNotFoundForNamedContainsClassAndName(): void
+    public function bindingNotFoundForNamedProducesExpectedMessage(): void
     {
         $e = BindingNotFoundException::named('SomeClass', 'primary');
 
         $this->assertInstanceOf(BindingNotFoundException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
-        $this->assertStringContainsString('primary', $e->getMessage());
+        $this->assertSame('No binding found for SomeClass with name primary', $e->getMessage());
     }
 
     /**
-     * - A qualified binding lookup failure produces a message containing both the
-     *   class name and the qualifier type so the caller can identify the exact
-     *   missing configuration.
+     * - A qualified binding lookup failure produces the expected message.
      */
     #[Test]
-    public function bindingNotFoundForQualifiedContainsClassAndQualifier(): void
+    public function bindingNotFoundForQualifiedProducesExpectedMessage(): void
     {
         $e = BindingNotFoundException::qualified('SomeClass', 'SomeQualifier');
 
         $this->assertInstanceOf(BindingNotFoundException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
-        $this->assertStringContainsString('SomeQualifier', $e->getMessage());
+        $this->assertSame('No binding found for SomeClass qualified by SomeQualifier', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -72,16 +66,15 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - An invalid class error includes the offending class name in its message
-     *   so it is immediately clear which class caused the failure.
+     * - An invalid class error produces the expected message.
      */
     #[Test]
-    public function invalidClassMakeContainsClassName(): void
+    public function invalidClassMakeProducesExpectedMessage(): void
     {
         $e = InvalidClassException::make('NonExistentClass');
 
         $this->assertInstanceOf(InvalidClassException::class, $e);
-        $this->assertStringContainsString('NonExistentClass', $e->getMessage());
+        $this->assertSame('The provided class NonExistentClass is not a valid class.', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -89,16 +82,15 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - An invalid function error includes the offending function name in its
-     *   message so the caller can identify which function could not be found.
+     * - An invalid function error produces the expected message.
      */
     #[Test]
-    public function invalidFunctionMakeContainsFunctionName(): void
+    public function invalidFunctionMakeProducesExpectedMessage(): void
     {
         $e = InvalidFunctionException::make('nonExistentFunction');
 
         $this->assertInstanceOf(InvalidFunctionException::class, $e);
-        $this->assertStringContainsString('nonExistentFunction', $e->getMessage());
+        $this->assertSame('The provided function nonExistentFunction does not exist.', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -106,17 +98,15 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - An invalid method error includes both the class name and the method name
-     *   so the caller can locate the missing method at a glance.
+     * - An invalid method error produces the expected message.
      */
     #[Test]
-    public function invalidMethodMakeContainsClassAndMethod(): void
+    public function invalidMethodMakeProducesExpectedMessage(): void
     {
         $e = InvalidMethodException::make('SomeClass', 'badMethod');
 
         $this->assertInstanceOf(InvalidMethodException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
-        $this->assertStringContainsString('badMethod', $e->getMessage());
+        $this->assertSame('The provided method SomeClass::badMethod is not a valid method.', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -124,17 +114,15 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - A method call failure error includes both the class name and the method
-     *   name to pinpoint which call could not be completed.
+     * - A method call failure error produces the expected message.
      */
     #[Test]
-    public function methodCallExceptionMakeContainsClassAndMethod(): void
+    public function methodCallExceptionMakeProducesExpectedMessage(): void
     {
         $e = MethodCallException::make('SomeClass', 'someMethod');
 
         $this->assertInstanceOf(MethodCallException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
-        $this->assertStringContainsString('someMethod', $e->getMessage());
+        $this->assertSame('Unable to call the provided method SomeClass::someMethod.', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -142,16 +130,15 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - A not-instantiable error includes the class name so the caller knows
-     *   which abstract or interface was incorrectly passed to the container.
+     * - A not-instantiable error produces the expected message.
      */
     #[Test]
-    public function notInstantiableMakeContainsClassName(): void
+    public function notInstantiableMakeProducesExpectedMessage(): void
     {
         $e = NotInstantiableException::make('AbstractThing');
 
         $this->assertInstanceOf(NotInstantiableException::class, $e);
-        $this->assertStringContainsString('AbstractThing', $e->getMessage());
+        $this->assertSame('Class AbstractThing is not instantiable', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -159,16 +146,22 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - An unresolvable class error includes the class name in its message, making
-     *   it clear which class carries the `#[NoResolution]` attribute.
+     * - An unresolvable class error produces the expected message, naming both
+     *   the class and the NoResolution attribute.
      */
     #[Test]
-    public function unresolvableClassMakeContainsClassNameAndAttribute(): void
+    public function unresolvableClassMakeProducesExpectedMessage(): void
     {
         $e = UnresolvableClassException::make('LockedClass');
 
         $this->assertInstanceOf(UnresolvableClassException::class, $e);
-        $this->assertStringContainsString('LockedClass', $e->getMessage());
+        $this->assertSame(
+            sprintf(
+                'The class LockedClass is marked with \'%s\', so cannot be resolved automatically.',
+                NoResolution::class
+            ),
+            $e->getMessage()
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -176,81 +169,75 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - A cannot-resolve error identifies the type that could not be resolved,
-     *   so the user can trace which dependency is missing.
+     * - A cannot-resolve error produces the expected message.
      */
     #[Test]
-    public function dependencyCannotResolveContainsType(): void
+    public function dependencyCannotResolveProducesExpectedMessage(): void
     {
         $e = DependencyResolutionException::cannotResolve('string');
 
         $this->assertInstanceOf(DependencyResolutionException::class, $e);
-        $this->assertStringContainsString('string', $e->getMessage());
+        $this->assertSame('Cannot resolve a dependency of type "string".', $e->getMessage());
     }
 
     /**
-     * - An intersection resolution failure error names the intersection type
-     *   so the caller can see which multi-interface dependency could not be satisfied.
+     * - An intersection resolution failure error produces the expected message.
      */
     #[Test]
-    public function dependencyIntersectionContainsType(): void
+    public function dependencyIntersectionProducesExpectedMessage(): void
     {
         $e = DependencyResolutionException::intersection('FooInterface&BarInterface');
 
         $this->assertInstanceOf(DependencyResolutionException::class, $e);
-        $this->assertStringContainsString('FooInterface&BarInterface', $e->getMessage());
+        $this->assertSame('Cannot resolve the intersection dependency "FooInterface&BarInterface".', $e->getMessage());
     }
 
     /**
-     * - An intersection-no-binding error identifies the intersection type that has
-     *   no registered binding, distinguishing it from a general resolution failure.
+     * - An intersection-no-binding error produces the expected message.
      */
     #[Test]
-    public function dependencyIntersectionNoBindingContainsType(): void
+    public function dependencyIntersectionNoBindingProducesExpectedMessage(): void
     {
         $e = DependencyResolutionException::intersectionNoBinding('FooInterface&BarInterface');
 
         $this->assertInstanceOf(DependencyResolutionException::class, $e);
-        $this->assertStringContainsString('FooInterface&BarInterface', $e->getMessage());
+        $this->assertSame('Cannot resolve the intersection dependency "FooInterface&BarInterface" without a binding.', $e->getMessage());
     }
 
     /**
-     * - A union resolution failure error names the union type so the user can
-     *   identify which multi-type parameter could not be satisfied.
+     * - A union resolution failure error produces the expected message.
      */
     #[Test]
-    public function dependencyUnionContainsType(): void
+    public function dependencyUnionProducesExpectedMessage(): void
     {
         $e = DependencyResolutionException::union('Foo|Bar');
 
         $this->assertInstanceOf(DependencyResolutionException::class, $e);
-        $this->assertStringContainsString('Foo|Bar', $e->getMessage());
+        $this->assertSame('Cannot resolve the union dependency "Foo|Bar".', $e->getMessage());
     }
 
     /**
-     * - A ghost resolution failure error names the type that could not be turned
-     *   into a ghost object, confirming the message carries the problematic type.
+     * - A ghost resolution failure error produces the expected message.
      */
     #[Test]
-    public function dependencyGhostContainsType(): void
+    public function dependencyGhostProducesExpectedMessage(): void
     {
         $e = DependencyResolutionException::ghost('string');
 
         $this->assertInstanceOf(DependencyResolutionException::class, $e);
-        $this->assertStringContainsString('string', $e->getMessage());
+        $this->assertSame('Cannot create a ghost object for "string".', $e->getMessage());
     }
 
     /**
-     * - A named-and-qualified error produces a non-empty message, confirming that
-     *   the combination of name and qualifier on a single dependency is rejected.
+     * - A named-and-qualified error produces the expected message.
      */
     #[Test]
-    public function dependencyNamedAndQualifiedHasMessage(): void
+    public function dependencyNamedAndQualifiedProducesExpectedMessage(): void
     {
         $e = DependencyResolutionException::namedAndQualified();
 
         $this->assertInstanceOf(DependencyResolutionException::class, $e);
-        $this->assertNotEmpty($e->getMessage());
+        $this->assertSame('Cannot resolve a dependency using both a name and a qualifier.', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -258,55 +245,51 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - An unregistered resolvable error names the resolvable class so the user
-     *   can identify which attribute has no corresponding resolver registered.
+     * - An unregistered resolvable error produces the expected message.
      */
     #[Test]
-    public function invalidResolverUnregisteredContainsResolvable(): void
+    public function invalidResolverUnregisteredProducesExpectedMessage(): void
     {
         $e = InvalidResolverException::unregistered('SomeResolvable');
 
         $this->assertInstanceOf(InvalidResolverException::class, $e);
-        $this->assertStringContainsString('SomeResolvable', $e->getMessage());
+        $this->assertSame('"SomeResolvable" is not a registered resolvable.', $e->getMessage());
     }
 
     /**
-     * - An invalid-resolvable error names the class that does not satisfy the
-     *   resolvable contract, aiding diagnosis of misconfigured resolver maps.
+     * - An invalid-resolvable error produces the expected message.
      */
     #[Test]
-    public function invalidResolverResolvableContainsClass(): void
+    public function invalidResolverResolvableProducesExpectedMessage(): void
     {
         $e = InvalidResolverException::resolvable('NotAResolvable');
 
         $this->assertInstanceOf(InvalidResolverException::class, $e);
-        $this->assertStringContainsString('NotAResolvable', $e->getMessage());
+        $this->assertSame('"NotAResolvable" is not a valid resolvable.', $e->getMessage());
     }
 
     /**
-     * - An invalid-resolver error names the class that does not implement the
-     *   resolver contract, so the developer can fix the registration.
+     * - An invalid-resolver error produces the expected message.
      */
     #[Test]
-    public function invalidResolverResolverContainsClass(): void
+    public function invalidResolverResolverProducesExpectedMessage(): void
     {
         $e = InvalidResolverException::resolver('NotAResolver');
 
         $this->assertInstanceOf(InvalidResolverException::class, $e);
-        $this->assertStringContainsString('NotAResolver', $e->getMessage());
+        $this->assertSame('"NotAResolver" is not a valid resolver.', $e->getMessage());
     }
 
     /**
-     * - A no-default-resolver error produces a non-empty message indicating
-     *   the catalogue was not configured with a default.
+     * - A no-default-resolver error produces the expected message.
      */
     #[Test]
-    public function invalidResolverNoDefaultHasMessage(): void
+    public function invalidResolverNoDefaultProducesExpectedMessage(): void
     {
         $e = InvalidResolverException::noDefault();
 
         $this->assertInstanceOf(InvalidResolverException::class, $e);
-        $this->assertNotEmpty($e->getMessage());
+        $this->assertSame('There is no default resolver.', $e->getMessage());
     }
 
     // -------------------------------------------------------------------------
@@ -314,43 +297,39 @@ class ExceptionsTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * - A not-public invocation error includes both the class name and method name
-     *   so the caller immediately knows which non-public method was targeted.
+     * - A not-public invocation error produces the expected message.
      */
     #[Test]
-    public function invalidInvocationNotPublicContainsClassAndMethod(): void
+    public function invalidInvocationNotPublicProducesExpectedMessage(): void
     {
         $e = InvalidInvocationException::notPublic('SomeClass', 'privateMethod');
 
         $this->assertInstanceOf(InvalidInvocationException::class, $e);
-        $this->assertStringContainsString('SomeClass', $e->getMessage());
-        $this->assertStringContainsString('privateMethod', $e->getMessage());
+        $this->assertSame('Method SomeClass::privateMethod is not public.', $e->getMessage());
     }
 
     /**
-     * - A not-callable error produces a non-empty message indicating the invokable
-     *   could not be treated as a callable.
+     * - A not-callable error produces the expected message.
      */
     #[Test]
-    public function invalidInvocationNotCallableHasMessage(): void
+    public function invalidInvocationNotCallableProducesExpectedMessage(): void
     {
         $e = InvalidInvocationException::notCallable();
 
         $this->assertInstanceOf(InvalidInvocationException::class, $e);
-        $this->assertNotEmpty($e->getMessage());
+        $this->assertSame('Cannot invoke a non-callable.', $e->getMessage());
     }
 
     /**
-     * - A not-method error produces a non-empty message indicating the invokable
-     *   could not be treated as a string method name.
+     * - A not-method error produces the expected message.
      */
     #[Test]
-    public function invalidInvocationNotMethodHasMessage(): void
+    public function invalidInvocationNotMethodProducesExpectedMessage(): void
     {
         $e = InvalidInvocationException::notMethod();
 
         $this->assertInstanceOf(InvalidInvocationException::class, $e);
-        $this->assertNotEmpty($e->getMessage());
+        $this->assertSame('Cannot invoke a non-string method.', $e->getMessage());
     }
 
 }
