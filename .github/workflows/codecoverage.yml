@@ -30,3 +30,8 @@ jobs:
         with:
           report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
