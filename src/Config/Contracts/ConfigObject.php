@@ -16,8 +16,9 @@ interface ConfigObject
     /**
      * Set the object state.
      *
-     * This method is called when unserializing a persisted object from a
-     * cached config.
+     * This method is called by PHP when restoring an object exported via
+     * <code>var_export()</code>, allowing cached config objects to be
+     * reconstituted from their exported state.
      *
      * @param array<string|int, mixed> $data
      *
