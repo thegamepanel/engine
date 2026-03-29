@@ -100,10 +100,7 @@ final class ConnectionFactory
      */
     private function createPdo(ConnectionConfig $config): PDO
     {
-        $options = array_merge(
-            self::$defaultOptions,
-            $config->options,
-        );
+        $options = $config->options + self::$defaultOptions;
 
         // This should only ever create a MySQL instance because the driver is
         // hardcoded, but this is here for the future.
