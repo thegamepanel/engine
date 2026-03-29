@@ -5,7 +5,7 @@ namespace Engine\Config;
 
 use Engine\Config\Contracts\ConfigObject;
 
-final readonly class ConfigRegistry
+final readonly class ConfigCatalogue
 {
     /**
      * Create a map of class names to their module and config name.
@@ -35,7 +35,7 @@ final readonly class ConfigRegistry
      *
      * @var array<class-string<ConfigObject>, array{module: string, config: string}>
      */
-    public array $classMappings;
+    private array $classMappings;
 
     /**
      * The loaded config.
