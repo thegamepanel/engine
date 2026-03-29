@@ -52,6 +52,8 @@ final readonly class ConnectionConfig extends BaseConfigObject
         return new self($host, $port, $socket, $database, $username, $password, $options);
     }
 
+    public string $driver;
+
     /**
      * @param string|null  $host
      * @param int|null     $port
@@ -70,6 +72,7 @@ final readonly class ConnectionConfig extends BaseConfigObject
         public string  $password,
         public array   $options = [],
     ) {
+        $this->driver = 'mysql';
     }
 
     /**
