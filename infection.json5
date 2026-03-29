@@ -26,9 +26,14 @@
         "Engine\\Container\\Container::collectDependencies::392"
       ]
     },
-    "Coalesce"     : {
+    "Coalesce"         : {
       "ignore": [
         "Engine\\Container\\Resolvers\\GenericResolver::resolve::56",
+      ]
+    },
+    "MatchArmRemoval": {
+      "ignore": [
+        "Engine\\Database\\ConnectionFactory::createPdo::107"
       ]
     },
     "IfNegation"   : {

@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: engine_test
+      MYSQL_USER: engine
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mysql_secondary:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: engine_test_port
+      MYSQL_USER: engine
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mysql_socket:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: engine_test_socket
+      MYSQL_USER: engine
+      MYSQL_PASSWORD: secret
+    volumes:
+      - ./tmp/mysql_socket:/var/run/mysqld
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-S", "/var/run/mysqld/mysqld.sock" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10

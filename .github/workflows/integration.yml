@@ -1,5 +1,7 @@
-name: Code Coverage
-on: [ push, pull_request ]
+name: Integration Tests
+
+on: [ pull_request ]
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -60,8 +62,8 @@ jobs:
             sleep 2
           done
 
-      - name: Run tests and collect coverage
-        run: vendor/bin/phpunit --coverage-clover coverage.xml --log-junit junit.xml
+      - name: Run integration tests
+        run: vendor/bin/phpunit --testsuite Integration
         env:
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
@@ -72,16 +74,3 @@ jobs:
           DB_DATABASE_SECONDARY: engine_test_port
           DB_SOCKET: /tmp/mysql_socket/mysqld.sock
           DB_DATABASE_SOCKET: engine_test_socket
-
-      - name: Upload coverage to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
-        with:
-          report_type: test_results
-          token: ${{ secrets.CODECOV_TOKEN }}

@@ -41,10 +41,10 @@ final readonly class DatabaseConfig extends BaseConfigObject
      * @param array<string, ConnectionConfig> $connections
      * @param bool                            $persistent
      */
-    private function __construct(
+    protected function __construct(
         public string $primary,
         public array $connections,
-        public bool $persistent = false,
+        public bool $persistent,
     ) {
         assert(! empty($this->primary), 'Primary connection is not defined.');
         assert(! empty($this->connections), 'No connections defined.');

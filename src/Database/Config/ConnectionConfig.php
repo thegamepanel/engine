@@ -63,7 +63,7 @@ final readonly class ConnectionConfig extends BaseConfigObject
      * @param string       $password
      * @param array<mixed> $options
      */
-    private function __construct(
+    protected function __construct(
         public ?string $host,
         public ?int    $port,
         public ?string $socket,
@@ -73,21 +73,5 @@ final readonly class ConnectionConfig extends BaseConfigObject
         public array   $options = [],
     ) {
         $this->driver = 'mysql';
-    }
-
-    /**
-     * Set the object state.
-     *
-     * This method is called by PHP when restoring an object exported via
-     * <code>var_export()</code>, allowing cached config objects to be
-     * reconstituted from their exported state.
-     *
-     * @param array<string|int, mixed> $data
-     *
-     * @return static
-     */
-    public static function __set_state(array $data): static
-    {
-        // TODO: Implement __set_state() method.
     }
 }
