@@ -47,6 +47,7 @@ jobs:
       - name: Start MySQL socket container
         run: |
           mkdir -p /tmp/mysql_socket
+          chmod 777 /tmp/mysql_socket
           docker run -d \
             --name mysql_socket \
             -e MYSQL_ROOT_PASSWORD=secret \
@@ -56,9 +57,19 @@ jobs:
             -v /tmp/mysql_socket:/var/run/mysqld \
             mysql:8.4
           for i in $(seq 1 30); do
-            [ -S /tmp/mysql_socket/mysqld.sock ] && break
+            docker exec mysql_socket mysqladmin ping -u root -psecret -h 127.0.0.1 --silent 2>/dev/null && break
             sleep 2
           done
+          for i in $(seq 1 10); do
+            [ -S /tmp/mysql_socket/mysqld.sock ] && break
+            sleep 1
+          done
+          [ -S /tmp/mysql_socket/mysqld.sock ] || { echo "ERROR: socket file not found"; docker logs mysql_socket; exit 1; }
+          docker exec mysql_socket mysql -u root -psecret -h 127.0.0.1 -e "
+            CREATE USER IF NOT EXISTS 'engine'@'localhost' IDENTIFIED BY 'secret';
+            GRANT ALL PRIVILEGES ON \`engine_test_socket\`.* TO 'engine'@'localhost';
+            FLUSH PRIVILEGES;
+          "
 
       - name: Run tests and collect coverage
         run: vendor/bin/phpunit --coverage-clover coverage.xml --log-junit junit.xml
