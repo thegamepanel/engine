@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Engine\Config;
 
 use Dotenv\Dotenv;
+use Engine\Config\Exceptions\EnvInitialisationException;
 use Engine\Config\Exceptions\InvalidEnvException;
 
 /**
@@ -24,9 +25,15 @@ final class Env
 
     /**
      * Create an instance from the superglobal.
+     *
+     * @throws EnvInitialisationException
      */
     public static function createFromSuperglobal(): void
     {
+        if (self::$instance !== null) {
+            throw EnvInitialisationException::alreadyInitialised();
+        }
+
         /** @var array<string, string|int|float|bool|null> $values */
         $values = $_ENV;
 
@@ -37,9 +44,15 @@ final class Env
      * Create an instance from an env file.
      *
      * @param string $path
+     *
+     * @throws EnvInitialisationException
      */
     public static function createFromFile(string $path): void
     {
+        if (self::$instance !== null) {
+            throw EnvInitialisationException::alreadyInitialised();
+        }
+
         $dotenv = Dotenv::createArrayBacked($path);
 
         /** @var array<string, string|int|float|bool|null> $values */
@@ -58,10 +71,12 @@ final class Env
      * @param string|int|float|bool|null $default
      *
      * @return string|int|float|bool|null
+     *
+     * @throws EnvInitialisationException
      */
     public static function get(string $key, bool|float|int|string|null $default = null): bool|float|int|string|null
     {
-        return self::$instance->values[$key] ?? $default;
+        return self::instance()->values[$key] ?? $default;
     }
 
     /**
@@ -74,10 +89,12 @@ final class Env
      * @param string $key
      *
      * @return bool
+     *
+     * @throws EnvInitialisationException
      */
     public static function has(string $key): bool
     {
-        return array_key_exists($key, self::$instance->values ?? []);
+        return array_key_exists($key, self::instance()->values);
     }
 
     /**
@@ -155,6 +172,8 @@ final class Env
      * @param TDefault $default
      *
      * @return (TDefault is float ? float : null)
+     *
+     * @throws InvalidEnvException
      */
     public static function float(string $key, ?float $default = null): ?float
     {
@@ -233,6 +252,20 @@ final class Env
     public static function destroy(): void
     {
         self::$instance = null;
+    }
+
+    /**
+     * Get the current instance.
+     *
+     * @return static
+     */
+    private static function instance(): self
+    {
+        if (self::$instance === null) {
+            throw EnvInitialisationException::notInitialised();
+        }
+
+        return self::$instance;
     }
 
     /**
