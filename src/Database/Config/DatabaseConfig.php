@@ -27,21 +27,24 @@ final readonly class DatabaseConfig extends BaseConfigObject
     /**
      * @param string                          $primary
      * @param array<string, ConnectionConfig> $connections
+     * @param bool                            $persistent
      *
      * @return DatabaseConfig
      */
-    public static function make(string $primary, array $connections): self
+    public static function make(string $primary, array $connections, bool $persistent = false): self
     {
-        return new self($primary, $connections);
+        return new self($primary, $connections, $persistent);
     }
 
     /**
      * @param string                          $primary
      * @param array<string, ConnectionConfig> $connections
+     * @param bool                            $persistent
      */
     private function __construct(
         public string $primary,
         public array $connections,
+        public bool $persistent = false,
     ) {
         assert(! empty($this->primary), 'Primary connection is not defined.');
         assert(! empty($this->connections), 'No connections defined.');
