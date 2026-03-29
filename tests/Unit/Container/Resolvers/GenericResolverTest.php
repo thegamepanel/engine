@@ -453,17 +453,17 @@ class GenericResolverTest extends TestCase
      *   satisfies the full intersection, the resolver continues past the pass binding
      *   and returns the valid instance from the second binding.
      *
-     * The fixture type is Stringable&Countable; Stringable is the first type the
-     * loop processes, so the pass binding must be registered under Stringable to
-     * ensure it is encountered before the valid Countable binding.
+     * The fixture type is Countable&Stringable; Countable is the first type the
+     * loop processes, so the pass binding must be registered under Countable to
+     * ensure it is encountered before the valid Stringable binding.
      */
     #[Test]
     public function resolveIntersectionTypeSkipsPassBindingAndResolvesNextValidBinding(): void
     {
         $resolver   = new GenericResolver();
         $instance   = new StringableCountable();
-        $pass       = new Binding(\Stringable::class); // pass binding — no instance/concrete/factory
-        $valid      = new Binding(\Countable::class, instance: $instance);
+        $pass       = new Binding(\Countable::class); // pass binding — no instance/concrete/factory
+        $valid      = new Binding(\Stringable::class, instance: $instance);
         $dependency = $this->dependencyFrom(ClassWithIntersectionParam::class, 'dep');
 
         $result = $resolver->resolve($dependency, $this->buildContainer($pass, $valid));
@@ -477,9 +477,9 @@ class GenericResolverTest extends TestCase
      *   instance that satisfies the full intersection, the resolver catches the exception,
      *   continues past the failing binding, and returns the valid instance.
      *
-     * The fixture type is Stringable&Countable; Stringable is the first type the
-     * loop processes, so the bad binding must be registered under Stringable to
-     * ensure it is encountered before the valid Countable binding.
+     * The fixture type is Countable&Stringable; Countable is the first type the
+     * loop processes, so the bad binding must be registered under Countable to
+     * ensure it is encountered before the valid Stringable binding.
      */
     #[Test]
     public function resolveIntersectionTypeSkipsInvalidClassBindingAndResolvesNextValidBinding(): void
@@ -488,8 +488,8 @@ class GenericResolverTest extends TestCase
         $instance = new StringableCountable();
         /** @var class-string $nonExistent */
         $nonExistent = 'NonExistentClass';
-        $bad         = new Binding(\Stringable::class, concrete: $nonExistent);
-        $valid       = new Binding(\Countable::class, instance: $instance);
+        $bad         = new Binding(\Countable::class, concrete: $nonExistent);
+        $valid       = new Binding(\Stringable::class, instance: $instance);
         $dependency  = $this->dependencyFrom(ClassWithIntersectionParam::class, 'dep');
 
         $result = $resolver->resolve($dependency, $this->buildContainer($bad, $valid));
