@@ -36,6 +36,7 @@ use Tests\Unit\Container\Fixtures\ClassWithNamedDependency;
 use Tests\Unit\Container\Fixtures\ClassWithNoResolution;
 use Tests\Unit\Container\Fixtures\ClassWithPrivateMethod;
 use Tests\Unit\Container\Fixtures\ClassWithProperty;
+use Tests\Unit\Container\Fixtures\ClassWithRequiredScalarParam;
 use Tests\Unit\Container\Fixtures\ClassWithScalarDefault;
 use Tests\Unit\Container\Fixtures\ClassWithVariadicParam;
 use Tests\Unit\Container\Fixtures\ConcreteClass;
@@ -670,6 +671,39 @@ class ContainerTest extends TestCase
         $result = $container->invoke(Invocation::method(ClassWithMethods::class, 'callableStaticMethod'));
 
         $this->assertTrue($result);
+    }
+
+    /**
+     * - Invoking a static method on a class whose constructor cannot be auto-resolved
+     *   still succeeds, proving the static path returns immediately without attempting
+     *   to resolve the class instance.
+     *   (Kills the ReturnRemoval mutant that removes `return` before invokeArgs on the
+     *   static path — without the return, the code would fall through and attempt to
+     *   resolve ClassWithRequiredScalarParam, throwing DependencyResolutionException.)
+     */
+    #[Test]
+    public function invokeStaticMethodOnUnresolvableClassReturnsResultDirectly(): void
+    {
+        $container = $this->buildContainer();
+
+        $result = $container->invoke(Invocation::method(ClassWithRequiredScalarParam::class, 'staticValue'));
+
+        $this->assertSame('static-result', $result);
+    }
+
+    /**
+     * - Invoking a static method while passing an object instance throws
+     *   InvalidInvocationException rather than silently discarding the object.
+     */
+    #[Test]
+    public function invokeStaticMethodOnObjectInstanceThrows(): void
+    {
+        $container = $this->buildContainer();
+        $object    = new ClassWithMethods();
+
+        $this->expectException(InvalidInvocationException::class);
+
+        $container->invoke(Invocation::method($object, 'callableStaticMethod'));
     }
 
     /**

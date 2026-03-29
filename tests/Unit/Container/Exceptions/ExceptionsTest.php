@@ -309,6 +309,21 @@ class ExceptionsTest extends TestCase
     }
 
     /**
+     * - An is-static invocation error produces the expected message.
+     */
+    #[Test]
+    public function invalidInvocationIsStaticProducesExpectedMessage(): void
+    {
+        $e = InvalidInvocationException::isStatic('SomeClass', 'staticMethod');
+
+        $this->assertInstanceOf(InvalidInvocationException::class, $e);
+        $this->assertSame(
+            'Method SomeClass::staticMethod is static and cannot be invoked on an object instance.',
+            $e->getMessage(),
+        );
+    }
+
+    /**
      * - A not-callable error produces the expected message.
      */
     #[Test]

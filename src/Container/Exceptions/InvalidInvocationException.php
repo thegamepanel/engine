@@ -15,6 +15,13 @@ final class InvalidInvocationException extends InvalidArgumentException implemen
         );
     }
 
+    public static function isStatic(string $class, string $method): self
+    {
+        return new self(
+            sprintf('Method %s::%s is static and cannot be invoked on an object instance.', $class, $method),
+        );
+    }
+
     public static function notCallable(): self
     {
         return new self('Cannot invoke a non-callable.');
