@@ -332,9 +332,13 @@ final class Container
         $dependencies = $this->collectDependencies($methodReflector, $invocation->arguments);
 
         try {
-            // If it's static, we just call it, regardless of whether we've been
-            // give an object or not.
+            // If it's static, calling it on an object instance is a contract
+            // violation, so we throw rather than silently discard the object.
             if ($methodReflector->isStatic() === true) {
+                if ($object !== null) {
+                    throw InvalidInvocationException::isStatic($class, $method);
+                }
+
                 return $methodReflector->invokeArgs(null, $dependencies);
             }
 

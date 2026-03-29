@@ -11,6 +11,11 @@ namespace Tests\Unit\Container\Fixtures;
  */
 class ClassWithRequiredScalarParam
 {
+    public static function staticValue(): string
+    {
+        return 'static-result';
+    }
+
     public function __construct(public readonly string $value)
     {
     }
