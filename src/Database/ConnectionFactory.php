@@ -139,7 +139,7 @@ final class ConnectionFactory
             return sprintf(
                 'mysql:host=%s;port=%d;dbname=%s',
                 $config->host,
-                $config->port ?? 3307,
+                $config->port ?? 3306,
                 $config->database,
             );
         }
