@@ -56,21 +56,13 @@ final class JoinClause implements Expression
      * Add a WHERE condition to the join (bound value, not column reference).
      *
      * @param string $column
-     * @param mixed  $operatorOrValue
+     * @param string $operator
      * @param mixed  $value
      *
      * @return $this
      */
-    public function where(string $column, mixed $operatorOrValue = null, mixed $value = null): self
+    public function where(string $column, string $operator, mixed $value): self
     {
-        if (func_num_args() === 2) {
-            $value    = $operatorOrValue;
-            $operator = '=';
-        } else {
-            /** @var string $operator */
-            $operator = $operatorOrValue;
-        }
-
         $this->conditions[] = [
             'conjunction' => 'AND',
             'sql'         => "{$column} {$operator} ?",
@@ -84,21 +76,13 @@ final class JoinClause implements Expression
      * Add an OR WHERE condition to the join.
      *
      * @param string $column
-     * @param mixed  $operatorOrValue
+     * @param string $operator
      * @param mixed  $value
      *
      * @return $this
      */
-    public function orWhere(string $column, mixed $operatorOrValue = null, mixed $value = null): self
+    public function orWhere(string $column, string $operator, mixed $value): self
     {
-        if (func_num_args() === 2) {
-            $value    = $operatorOrValue;
-            $operator = '=';
-        } else {
-            /** @var string $operator */
-            $operator = $operatorOrValue;
-        }
-
         $this->conditions[] = [
             'conjunction' => 'OR',
             'sql'         => "{$column} {$operator} ?",

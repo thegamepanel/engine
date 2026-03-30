@@ -19,24 +19,16 @@ final class WhereClause implements Expression
      * Add a basic where clause to the query.
      *
      * @param string|Closure $column
-     * @param mixed|null     $operatorOrValue
+     * @param string|null    $operator
      * @param mixed|null     $value
      *
      * @return $this
      */
-    public function where(Closure|string $column, mixed $operatorOrValue = null, mixed $value = null): self
+    public function where(Closure|string $column, ?string $operator = null, mixed $value = null): self
     {
         if ($column instanceof Closure) {
             $this->condition('AND', $column, null, null);
         } else {
-            if (func_num_args() === 2) {
-                $value    = $operatorOrValue;
-                $operator = '=';
-            } else {
-                /** @var string $operator */
-                $operator = $operatorOrValue;
-            }
-
             $this->condition('AND', $column, $operator, $value);
         }
 
@@ -47,24 +39,16 @@ final class WhereClause implements Expression
      * Add an "or where" clause to the query.
      *
      * @param string|Closure $column
-     * @param mixed|null     $operatorOrValue
+     * @param string|null    $operator
      * @param mixed|null     $value
      *
      * @return $this
      */
-    public function orWhere(Closure|string $column, mixed $operatorOrValue = null, mixed $value = null): self
+    public function orWhere(Closure|string $column, ?string $operator = null, mixed $value = null): self
     {
         if ($column instanceof Closure) {
             $this->condition('OR', $column, null, null);
         } else {
-            if (func_num_args() === 2) {
-                $value    = $operatorOrValue;
-                $operator = '=';
-            } else {
-                /** @var string $operator */
-                $operator = $operatorOrValue;
-            }
-
             $this->condition('OR', $column, $operator, $value);
         }
 

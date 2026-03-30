@@ -17,14 +17,14 @@ trait HasWhereClause
      * Add a basic where clause to the query.
      *
      * @param string|Closure $column
-     * @param mixed|null     $operatorOrValue
+     * @param string|null    $operator
      * @param mixed|null     $value
      *
      * @return $this
      */
-    public function where(Closure|string $column, mixed $operatorOrValue = null, mixed $value = null): static
+    public function where(Closure|string $column, ?string $operator = null, mixed $value = null): static
     {
-        $this->whereClause->where(...func_get_args());
+        $this->whereClause->where($column, $operator, $value);
 
         return $this;
     }
@@ -33,14 +33,14 @@ trait HasWhereClause
      * Add an "or where" clause to the query.
      *
      * @param string|Closure $column
-     * @param mixed|null     $operatorOrValue
+     * @param string|null    $operator
      * @param mixed|null     $value
      *
      * @return $this
      */
-    public function orWhere(Closure|string $column, mixed $operatorOrValue = null, mixed $value = null): static
+    public function orWhere(Closure|string $column, ?string $operator = null, mixed $value = null): static
     {
-        $this->whereClause->orWhere(...func_get_args());
+        $this->whereClause->orWhere($column, $operator, $value);
 
         return $this;
     }
