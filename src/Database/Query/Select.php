@@ -43,7 +43,7 @@ final class Select implements Query
      *
      * @param string|Expression ...$columns
      *
-     * @return $this
+     * @return static
      */
     public function columns(Expression|string ...$columns): self
     {
@@ -57,7 +57,7 @@ final class Select implements Query
      *
      * @param string|Expression $column
      *
-     * @return $this
+     * @return static
      */
     public function addColumn(Expression|string $column): self
     {
@@ -69,7 +69,7 @@ final class Select implements Query
     /**
      * Set the query to select distinct rows.
      *
-     * @return $this
+     * @return static
      */
     public function distinct(): self
     {

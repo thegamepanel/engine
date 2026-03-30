@@ -18,7 +18,7 @@ trait HasOrderByClause
      * @param string|Expression $column
      * @param string            $direction
      *
-     * @return $this
+     * @return static
      */
     public function orderBy(Expression|string $column, string $direction = 'asc'): static
     {
@@ -36,7 +36,7 @@ trait HasOrderByClause
             return '';
         }
 
-        $clauses = array_map(function (array $order): string {
+        $clauses = array_map(static function (array $order): string {
             $col = $order['column'] instanceof Expression
                 ? $order['column']->toSql()
                 : $order['column'];
@@ -56,10 +56,11 @@ trait HasOrderByClause
 
         foreach ($this->orders as $order) {
             if ($order['column'] instanceof Expression) {
-                $bindings = array_merge($bindings, $order['column']->getBindings());
+                $bindings[] = $order['column']->getBindings();
             }
         }
 
-        return $bindings;
+        /** @var array<int, mixed> */
+        return array_merge(...$bindings);
     }
 }

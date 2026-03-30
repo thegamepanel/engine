@@ -21,7 +21,7 @@ trait HasJoinClause
      * @param string|null    $operator
      * @param string|null    $second
      *
-     * @return $this
+     * @return static
      */
     public function join(string $table, Closure|string $first, ?string $operator = null, ?string $second = null): static
     {
@@ -36,7 +36,7 @@ trait HasJoinClause
      * @param string|null    $operator
      * @param string|null    $second
      *
-     * @return $this
+     * @return static
      */
     public function leftJoin(string $table, Closure|string $first, ?string $operator = null, ?string $second = null): static
     {
@@ -51,7 +51,7 @@ trait HasJoinClause
      * @param string|null    $operator
      * @param string|null    $second
      *
-     * @return $this
+     * @return static
      */
     public function rightJoin(string $table, Closure|string $first, ?string $operator = null, ?string $second = null): static
     {
@@ -63,7 +63,7 @@ trait HasJoinClause
      *
      * @param string $table
      *
-     * @return $this
+     * @return static
      */
     public function crossJoin(string $table): static
     {
@@ -79,7 +79,10 @@ trait HasJoinClause
         if ($first instanceof Closure) {
             $first($clause);
         } else {
-            /** @var string $operator */
+            /**
+             * @var string $operator
+             * @var string $second
+             */
             $clause->on($first, $operator, $second);
         }
 
@@ -117,9 +120,10 @@ trait HasJoinClause
         $bindings = [];
 
         foreach ($this->joins as $join) {
-            $bindings = array_merge($bindings, $join['clause']->getBindings());
+            $bindings[] = $join['clause']->getBindings();
         }
 
-        return $bindings;
+        /** @var array<int, mixed> */
+        return array_merge(...$bindings);
     }
 }

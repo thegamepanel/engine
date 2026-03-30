@@ -19,7 +19,6 @@ final readonly class Connection
 {
     public function __construct(
         public string $name,
-        // @phpstan-ignore property.onlyWritten
         private PDO $pdo,
     ) {
     }

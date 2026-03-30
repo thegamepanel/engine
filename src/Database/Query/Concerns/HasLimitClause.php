@@ -14,7 +14,7 @@ trait HasLimitClause
      *
      * @param int $limit
      *
-     * @return $this
+     * @return static
      */
     public function limit(int $limit): static
     {
@@ -28,7 +28,7 @@ trait HasLimitClause
      *
      * @param int $offset
      *
-     * @return $this
+     * @return static
      */
     public function offset(int $offset): static
     {

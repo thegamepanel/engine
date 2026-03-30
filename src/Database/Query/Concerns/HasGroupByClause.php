@@ -49,10 +49,11 @@ trait HasGroupByClause
 
         foreach ($this->groups as $group) {
             if ($group instanceof Expression) {
-                $bindings = array_merge($bindings, $group->getBindings());
+                $bindings[] = $group->getBindings();
             }
         }
 
-        return $bindings;
+        /** @var array<int, mixed> */
+        return array_merge(...$bindings);
     }
 }

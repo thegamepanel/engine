@@ -10,29 +10,29 @@
     "html": "build/infection.html"
   },
   "mutators": {
-    "@default"     : true,
-    "TrueValue"    : {
+    "@default"           : true,
+    "TrueValue"          : {
       "ignore": [
         "Engine\\Container\\Container::lazy"
       ]
     },
-    "FalseValue"   : {
+    "FalseValue"         : {
       "ignore": [
         "Engine\\Container\\Container::resolve"
       ]
     },
-    "Break_"       : {
+    "Break_"             : {
       "ignore": [
         "Engine\\Container\\Container::collectDependencies::392"
       ]
     },
-    "Coalesce"         : {
+    "Coalesce"           : {
       "ignore": [
         "Engine\\Container\\Resolvers\\GenericResolver::resolve::56",
         "Engine\\Database\\ConnectionFactory::make::62"
       ]
     },
-    "DecrementInteger" : {
+    "DecrementInteger"   : {
       "ignore": [
         "Engine\\Database\\Query\\Expressions\\ColumnIn::toSql::38",
         "Engine\\Database\\Query\\Expressions\\ColumnNotIn::toSql::38",
@@ -41,7 +41,7 @@
         "Engine\\Values\\ValueGetter::array::64"
       ]
     },
-    "IncrementInteger" : {
+    "IncrementInteger"   : {
       "ignore": [
         "Engine\\Database\\Query\\Expressions\\ColumnIn::toSql::38",
         "Engine\\Database\\Query\\Expressions\\ColumnNotIn::toSql::38",
@@ -61,25 +61,25 @@
         "Engine\\Database\\Query\\Concerns\\HasHavingClause::hasHavingClause::77"
       ]
     },
-    "MethodCallRemoval": {
+    "MethodCallRemoval"  : {
       "ignore": [
         "Engine\\Database\\Connection::transaction::107"
       ]
     },
-    "ReturnRemoval"    : {
+    "ReturnRemoval"      : {
       "ignore": [
         "Engine\\Container\\Container::invokeClassMethod::350",
-        "Engine\\Database\\Query\\Concerns\\HasJoinClause::buildJoinClause::94",
+        "Engine\\Database\\Query\\Concerns\\HasJoinClause::buildJoinClause::97",
         "Engine\\Values\\ValueGetter::float::110",
         "Engine\\Values\\ValueGetter::int::135"
       ]
     },
-    "MatchArmRemoval": {
+    "MatchArmRemoval"    : {
       "ignore": [
         "Engine\\Database\\ConnectionFactory::createPdo::107"
       ]
     },
-    "IfNegation"   : {
+    "IfNegation"         : {
       "ignore": [
         "Engine\\Container\\Container::invokeClassMethod::349"
       ]
