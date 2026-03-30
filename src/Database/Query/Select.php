@@ -5,6 +5,8 @@ namespace Engine\Database\Query;
 
 use Engine\Database\Contracts\Expression;
 use Engine\Database\Contracts\Query;
+use Engine\Database\Query\Concerns\HasGroupByClause;
+use Engine\Database\Query\Concerns\HasHavingClause;
 use Engine\Database\Query\Concerns\HasJoinClause;
 use Engine\Database\Query\Concerns\HasLimitClause;
 use Engine\Database\Query\Concerns\HasOrderByClause;
@@ -16,6 +18,8 @@ final class Select implements Query
     use HasJoinClause;
     use HasOrderByClause;
     use HasLimitClause;
+    use HasGroupByClause;
+    use HasHavingClause;
 
     public static function from(Expression|string $table): self
     {
@@ -88,10 +92,13 @@ final class Select implements Query
         $distinct = $this->distinct ? 'DISTINCT ' : '';
         $table    = $this->table instanceof Expression ? '(' . $this->table->toSql() . ')' : $this->table;
         $where    = $this->hasWhereClause() ? ' WHERE ' . $this->whereClause->toSql() : '';
+        $having   = $this->hasHavingClause() ? ' HAVING ' . $this->havingClause->toSql() : '';
 
         return "SELECT {$distinct}{$columns} FROM {$table}"
              . $this->buildJoinClause()
              . $where
+             . $this->buildGroupByClause()
+             . $having
              . $this->buildOrderByClause()
              . $this->buildLimitClause();
     }
@@ -121,6 +128,8 @@ final class Select implements Query
             $bindings,
             $this->getJoinBindings(),
             $this->whereClause->getBindings(),
+            $this->getGroupByBindings(),
+            $this->havingClause->getBindings(),
             $this->getOrderByBindings(),
         );
     }

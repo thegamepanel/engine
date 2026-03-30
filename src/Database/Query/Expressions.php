@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Engine\Database\Query;
 
 use Engine\Database\Contracts\Expression;
+use Engine\Database\Query\Expressions\Aggregate;
 use Engine\Database\Query\Expressions\ColumnEqualTo;
 use Engine\Database\Query\Expressions\ColumnGreaterThen;
 use Engine\Database\Query\Expressions\ColumnGreaterThenOrEqualTo;
@@ -15,6 +16,7 @@ use Engine\Database\Query\Expressions\ColumnLessThan;
 use Engine\Database\Query\Expressions\ColumnLessThanOrEqualTo;
 use Engine\Database\Query\Expressions\ColumnNotEqualTo;
 use Engine\Database\Query\Expressions\ColumnNotIn;
+use Engine\Database\Query\Expressions\MatchAgainst;
 use Engine\Database\Query\Expressions\RawExpression;
 use InvalidArgumentException;
 
@@ -47,5 +49,77 @@ final class Expressions
     public static function raw(string $sql, array $bindings): Expression
     {
         return RawExpression::make($sql, $bindings);
+    }
+
+    /**
+     * @param string|Expression $column
+     *
+     * @return Expression
+     */
+    public static function count(Expression|string $column = '*'): Expression
+    {
+        return Aggregate::make('COUNT', $column);
+    }
+
+    /**
+     * @param string|Expression $column
+     *
+     * @return Expression
+     */
+    public static function sum(Expression|string $column): Expression
+    {
+        return Aggregate::make('SUM', $column);
+    }
+
+    /**
+     * @param string|Expression $column
+     *
+     * @return Expression
+     */
+    public static function min(Expression|string $column): Expression
+    {
+        return Aggregate::make('MIN', $column);
+    }
+
+    /**
+     * @param string|Expression $column
+     *
+     * @return Expression
+     */
+    public static function max(Expression|string $column): Expression
+    {
+        return Aggregate::make('MAX', $column);
+    }
+
+    /**
+     * @param string|Expression $column
+     *
+     * @return Expression
+     */
+    public static function avg(Expression|string $column): Expression
+    {
+        return Aggregate::make('AVG', $column);
+    }
+
+    /**
+     * @param array<string> $columns
+     * @param string        $value
+     *
+     * @return Expression
+     */
+    public static function match(array $columns, string $value): Expression
+    {
+        return MatchAgainst::make($columns, $value);
+    }
+
+    /**
+     * @param array<string> $columns
+     * @param string        $value
+     *
+     * @return Expression
+     */
+    public static function matchBoolean(array $columns, string $value): Expression
+    {
+        return MatchAgainst::make($columns, $value, 'boolean');
     }
 }

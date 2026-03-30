@@ -3,12 +3,17 @@ declare(strict_types=1);
 
 namespace Engine\Database\Query;
 
+use Engine\Database\Contracts\Expression;
 use Engine\Database\Contracts\Query;
+use Engine\Database\Query\Concerns\HasLimitClause;
+use Engine\Database\Query\Concerns\HasOrderByClause;
 use Engine\Database\Query\Concerns\HasWhereClause;
 
 final class Update implements Query
 {
     use HasWhereClause;
+    use HasOrderByClause;
+    use HasLimitClause;
 
     public static function table(string $table): self
     {
@@ -16,7 +21,7 @@ final class Update implements Query
     }
 
     /**
-     * @var array<string, mixed>
+     * @var array<string, mixed|Expression>
      */
     private array $sets = [];
 
@@ -28,9 +33,9 @@ final class Update implements Query
     /**
      * Set the column values to update.
      *
-     * @param array<string, mixed> $values
+     * @param array<string, mixed|Expression> $values
      *
-     * @return $this
+     * @return static
      */
     public function set(array $values): self
     {
@@ -48,13 +53,20 @@ final class Update implements Query
     {
         $setClauses = [];
 
-        foreach (array_keys($this->sets) as $column) {
-            $setClauses[] = "{$column} = ?";
+        foreach ($this->sets as $column => $value) {
+            if ($value instanceof Expression) {
+                $setClauses[] = "{$column} = {$value->toSql()}";
+            } else {
+                $setClauses[] = "{$column} = ?";
+            }
         }
 
         $where = $this->hasWhereClause() ? ' WHERE ' . $this->whereClause->toSql() : '';
 
-        return "UPDATE {$this->table} SET " . implode(', ', $setClauses) . $where;
+        return "UPDATE {$this->table} SET " . implode(', ', $setClauses)
+             . $where
+             . $this->buildOrderByClause()
+             . $this->buildLimitClause();
     }
 
     /**
@@ -64,9 +76,20 @@ final class Update implements Query
      */
     public function getBindings(): array
     {
+        $setBindings = [];
+
+        foreach ($this->sets as $value) {
+            if ($value instanceof Expression) {
+                array_push($setBindings, ...$value->getBindings());
+            } else {
+                $setBindings[] = $value;
+            }
+        }
+
         return array_merge(
-            array_values($this->sets),
+            $setBindings,
             $this->whereClause->getBindings(),
+            $this->getOrderByBindings(),
         );
     }
 }

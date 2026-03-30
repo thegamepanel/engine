@@ -19,7 +19,7 @@ final class JoinClause implements Expression
      * @param string $operator
      * @param string $right
      *
-     * @return $this
+     * @return static
      */
     public function on(string $left, string $operator, string $right): self
     {
@@ -39,7 +39,7 @@ final class JoinClause implements Expression
      * @param string $operator
      * @param string $right
      *
-     * @return $this
+     * @return static
      */
     public function orOn(string $left, string $operator, string $right): self
     {
@@ -59,7 +59,7 @@ final class JoinClause implements Expression
      * @param string $operator
      * @param mixed  $value
      *
-     * @return $this
+     * @return static
      */
     public function where(string $column, string $operator, mixed $value): self
     {
@@ -79,7 +79,7 @@ final class JoinClause implements Expression
      * @param string $operator
      * @param mixed  $value
      *
-     * @return $this
+     * @return static
      */
     public function orWhere(string $column, string $operator, mixed $value): self
     {
