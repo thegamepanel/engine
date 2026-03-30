@@ -43,6 +43,7 @@
   "scripts"     : {
     "test"    : "@php vendor/bin/phpunit",
     "mutation": "@php vendor/bin/infection --threads=max --no-progress",
-    "analyze" : "@php vendor/bin/phpstan analyse src --memory-limit=2G"
+    "analyze" : "@php vendor/bin/phpstan analyse src --memory-limit=2G",
+    "tidy"    : "@php vendor/bin/php-cs-fixer fix"
   }
 }
