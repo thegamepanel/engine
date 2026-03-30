@@ -92,11 +92,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image:
-          - mysql:8.0
-          - mysql:8.4
-          - mariadb:10.11
-          - mariadb:11.4
+        include:
+          - image: mysql:8.0
+            health_cmd: mysqladmin ping
+          - image: mysql:8.4
+            health_cmd: mysqladmin ping
+          - image: mariadb:10.11
+            health_cmd: mysqladmin ping
+          - image: mariadb:11.4
+            health_cmd: healthcheck.sh --connect --innodb_initialized
     services:
       database:
         image: ${{ matrix.image }}
@@ -108,7 +112,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="${{ matrix.health_cmd }}"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=10
