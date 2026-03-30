@@ -94,6 +94,54 @@ class UpdateTest extends TestCase
         $this->assertSame(['John', 1], $query->getBindings());
     }
 
+    /**
+     * - orWhere() on Update produces OR conjunction.
+     */
+    #[Test]
+    public function orWhereProducesOrConjunction(): void
+    {
+        $query = Update::table('users')
+            ->set(['status' => 'inactive'])
+            ->where('role', '=', 'guest')
+            ->orWhere('age', '<', 18)
+        ;
+
+        $this->assertSame(
+            'UPDATE users SET status = ? WHERE role = ? OR age < ?',
+            $query->toSql(),
+        );
+        $this->assertSame(['inactive', 'guest', 18], $query->getBindings());
+    }
+
+    /**
+     * - whereNull() on Update produces IS NULL clause.
+     */
+    #[Test]
+    public function whereNullProducesIsNullClause(): void
+    {
+        $query = Update::table('users')
+            ->set(['status' => 'inactive'])
+            ->whereNull('deleted_at')
+        ;
+
+        $this->assertSame('UPDATE users SET status = ? WHERE deleted_at IS NULL', $query->toSql());
+    }
+
+    /**
+     * - whereIn() on Update produces IN clause.
+     */
+    #[Test]
+    public function whereInProducesInClause(): void
+    {
+        $query = Update::table('users')
+            ->set(['status' => 'inactive'])
+            ->whereIn('id', [1, 2, 3])
+        ;
+
+        $this->assertSame('UPDATE users SET status = ? WHERE id IN (?, ?, ?)', $query->toSql());
+        $this->assertSame(['inactive', 1, 2, 3], $query->getBindings());
+    }
+
     // -------------------------------------------------------------------------
     // orderBy()
     // -------------------------------------------------------------------------

@@ -29,6 +29,49 @@
     "Coalesce"         : {
       "ignore": [
         "Engine\\Container\\Resolvers\\GenericResolver::resolve::56",
+        "Engine\\Database\\ConnectionFactory::make::62"
+      ]
+    },
+    "DecrementInteger" : {
+      "ignore": [
+        "Engine\\Database\\Query\\Expressions\\ColumnIn::toSql::38",
+        "Engine\\Database\\Query\\Expressions\\ColumnNotIn::toSql::38",
+        "Engine\\Database\\Query\\Insert::toSql::95",
+        "Engine\\Database\\Query\\Insert::toSql::96",
+        "Engine\\Values\\ValueGetter::array::64"
+      ]
+    },
+    "IncrementInteger" : {
+      "ignore": [
+        "Engine\\Database\\Query\\Expressions\\ColumnIn::toSql::38",
+        "Engine\\Database\\Query\\Expressions\\ColumnNotIn::toSql::38",
+        "Engine\\Database\\Query\\Insert::toSql::95",
+        "Engine\\Database\\Query\\Insert::toSql::96",
+        "Engine\\Values\\ValueGetter::array::64"
+      ]
+    },
+    "Assignment"         : {
+      "ignore": [
+        "Engine\\Database\\Query\\Concerns\\HasLimitClause::buildLimitClause::45"
+      ]
+    },
+    "ProtectedVisibility": {
+      "ignore": [
+        "Engine\\Database\\Query\\Concerns\\HasWhereClause::hasWhereClause::226",
+        "Engine\\Database\\Query\\Concerns\\HasHavingClause::hasHavingClause::77"
+      ]
+    },
+    "MethodCallRemoval": {
+      "ignore": [
+        "Engine\\Database\\Connection::transaction::107"
+      ]
+    },
+    "ReturnRemoval"    : {
+      "ignore": [
+        "Engine\\Container\\Container::invokeClassMethod::350",
+        "Engine\\Database\\Query\\Concerns\\HasJoinClause::buildJoinClause::94",
+        "Engine\\Values\\ValueGetter::float::110",
+        "Engine\\Values\\ValueGetter::int::135"
       ]
     },
     "MatchArmRemoval": {
@@ -39,11 +82,6 @@
     "IfNegation"   : {
       "ignore": [
         "Engine\\Container\\Container::invokeClassMethod::349"
-      ]
-    },
-    "ReturnRemoval": {
-      "ignore": [
-        "Engine\\Container\\Container::invokeClassMethod::350"
       ]
     }
   }

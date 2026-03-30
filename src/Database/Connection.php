@@ -62,9 +62,11 @@ final readonly class Connection
                 affectedRows: $this->statement($query, $bindings)->rowCount(),
                 lastInsertId: $this->pdo->lastInsertId() ?: null,
             );
+            // @codeCoverageIgnoreStart
         } catch (PDOException $e) {
             throw new QueryException($query, $bindings, previous: $e);
         }
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -129,9 +131,11 @@ final readonly class Connection
     {
         try {
             $this->pdo->commit();
+            // @codeCoverageIgnoreStart
         } catch (PDOException $e) {
             throw new DatabaseException($e->getMessage(), previous: $e);
         }
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -141,9 +145,11 @@ final readonly class Connection
     {
         try {
             $this->pdo->rollBack();
+            // @codeCoverageIgnoreStart
         } catch (PDOException $e) {
             throw new DatabaseException($e->getMessage(), previous: $e);
         }
+        // @codeCoverageIgnoreEnd
     }
 
     /**

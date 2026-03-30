@@ -345,6 +345,86 @@ class QueryBuilderTest extends TestCase
         $this->assertContains('Introduction to PHP programming', $titles);
     }
 
+    /**
+     * - An inner join returns rows matching the join condition.
+     */
+    #[Test]
+    public function selectWithInnerJoin(): void
+    {
+        self::$connection->execute(
+            Insert::into('qb_users')->values(['name' => 'Alice', 'email' => 'alice@example.com']),
+        );
+
+        $userId = self::$connection->query(
+            Select::from('qb_users')->where('email', '=', 'alice@example.com'),
+        )->first()->int('id');
+
+        self::$connection->execute(
+            Insert::into('qb_posts')
+                ->values(['user_id' => $userId, 'title' => 'Hello World', 'body' => 'First post content here']),
+        );
+
+        $result = self::$connection->query(
+            Select::from('qb_users')
+                ->columns('qb_users.name', 'qb_posts.title')
+                ->join('qb_posts', 'qb_users.id', '=', 'qb_posts.user_id'),
+        );
+
+        $this->assertCount(1, $result->all());
+        $this->assertSame('Alice', $result->first()->get('name'));
+        $this->assertSame('Hello World', $result->first()->get('title'));
+    }
+
+    /**
+     * - A left join returns all rows from the left table.
+     */
+    #[Test]
+    public function selectWithLeftJoin(): void
+    {
+        self::$connection->execute(
+            Insert::into('qb_users')
+                ->values(['name' => 'Alice', 'email' => 'alice@example.com'])
+                ->values(['name' => 'Bob', 'email' => 'bob@example.com']),
+        );
+
+        $userId = self::$connection->query(
+            Select::from('qb_users')->where('email', '=', 'alice@example.com'),
+        )->first()->int('id');
+
+        self::$connection->execute(
+            Insert::into('qb_posts')
+                ->values(['user_id' => $userId, 'title' => 'Hello', 'body' => 'Post body content']),
+        );
+
+        $result = self::$connection->query(
+            Select::from('qb_users')
+                ->columns('qb_users.name', 'qb_posts.title')
+                ->leftJoin('qb_posts', 'qb_users.id', '=', 'qb_posts.user_id'),
+        );
+
+        $this->assertCount(2, $result->all());
+    }
+
+    /**
+     * - A distinct select returns unique rows only.
+     */
+    #[Test]
+    public function selectDistinct(): void
+    {
+        self::$connection->execute(
+            Insert::into('qb_users')
+                ->values(['name' => 'Alice', 'email' => 'a@example.com', 'status' => 'active'])
+                ->values(['name' => 'Bob', 'email' => 'b@example.com', 'status' => 'active'])
+                ->values(['name' => 'Charlie', 'email' => 'c@example.com', 'status' => 'inactive']),
+        );
+
+        $result = self::$connection->query(
+            Select::from('qb_users')->distinct()->columns('status'),
+        );
+
+        $this->assertCount(2, $result->all());
+    }
+
     // -------------------------------------------------------------------------
     // Update
     // -------------------------------------------------------------------------
@@ -496,5 +576,102 @@ class QueryBuilderTest extends TestCase
 
         $this->assertNotNull($row);
         $this->assertSame(2, $row->int('result'));
+    }
+
+    // -------------------------------------------------------------------------
+    // Stream
+    // -------------------------------------------------------------------------
+
+    /**
+     * - stream() yields rows one at a time via cursor.
+     */
+    #[Test]
+    public function streamYieldsRowsViaCursor(): void
+    {
+        self::$connection->execute(
+            Insert::into('qb_users')
+                ->values(['name' => 'Alice', 'email' => 'a@example.com'])
+                ->values(['name' => 'Bob', 'email' => 'b@example.com']),
+        );
+
+        $cursor = self::$connection->stream(
+            Select::from('qb_users')->orderBy('name', 'asc'),
+        );
+
+        $names = [];
+
+        $cursor->each(function ($row) use (&$names) {
+            $names[] = $row->get('name');
+        });
+
+        $this->assertSame(['Alice', 'Bob'], $names);
+    }
+
+    /**
+     * - stream() returns a Cursor whose rows() generator yields Row objects.
+     */
+    #[Test]
+    public function streamCursorRowsGeneratorYieldsRows(): void
+    {
+        self::$connection->execute(
+            Insert::into('qb_users')
+                ->values(['name' => 'Alice', 'email' => 'a@example.com'])
+                ->values(['name' => 'Bob', 'email' => 'b@example.com']),
+        );
+
+        $cursor = self::$connection->stream(
+            Select::from('qb_users')->orderBy('name', 'asc'),
+        );
+
+        $names = [];
+
+        foreach ($cursor->rows() as $row) {
+            $names[] = $row->get('name');
+        }
+
+        $this->assertSame(['Alice', 'Bob'], $names);
+    }
+
+    // -------------------------------------------------------------------------
+    // Transactions
+    // -------------------------------------------------------------------------
+
+    /**
+     * - A committed transaction persists data.
+     */
+    #[Test]
+    public function transactionCommitPersistsData(): void
+    {
+        self::$connection->transaction(function (Connection $conn) {
+            $conn->execute(
+                Insert::into('qb_users')->values(['name' => 'Alice', 'email' => 'alice@example.com']),
+            );
+        });
+
+        $result = self::$connection->query(Select::from('qb_users'));
+
+        $this->assertCount(1, $result->all());
+    }
+
+    /**
+     * - A rolled back transaction does not persist data.
+     */
+    #[Test]
+    public function transactionRollbackDiscardsData(): void
+    {
+        try {
+            self::$connection->transaction(function (Connection $conn) {
+                $conn->execute(
+                    Insert::into('qb_users')->values(['name' => 'Alice', 'email' => 'alice@example.com']),
+                );
+                throw new \RuntimeException('force rollback');
+            });
+        } catch (\RuntimeException) {
+            // expected
+        }
+
+        $result = self::$connection->query(Select::from('qb_users'));
+
+        $this->assertCount(0, $result->all());
     }
 }

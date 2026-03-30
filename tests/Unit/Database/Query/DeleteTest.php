@@ -46,6 +46,44 @@ class DeleteTest extends TestCase
         $this->assertSame(['inactive'], $query->getBindings());
     }
 
+    /**
+     * - orWhere() on Delete produces OR conjunction.
+     */
+    #[Test]
+    public function orWhereProducesOrConjunction(): void
+    {
+        $query = Delete::from('users')
+            ->where('status', '=', 'inactive')
+            ->orWhere('age', '<', 13)
+        ;
+
+        $this->assertSame('DELETE FROM users WHERE status = ? OR age < ?', $query->toSql());
+        $this->assertSame(['inactive', 13], $query->getBindings());
+    }
+
+    /**
+     * - whereNull() on Delete produces IS NULL clause.
+     */
+    #[Test]
+    public function whereNullProducesIsNullClause(): void
+    {
+        $query = Delete::from('sessions')->whereNull('expired_at');
+
+        $this->assertSame('DELETE FROM sessions WHERE expired_at IS NULL', $query->toSql());
+    }
+
+    /**
+     * - whereIn() on Delete produces IN clause.
+     */
+    #[Test]
+    public function whereInProducesInClause(): void
+    {
+        $query = Delete::from('users')->whereIn('id', [1, 2, 3]);
+
+        $this->assertSame('DELETE FROM users WHERE id IN (?, ?, ?)', $query->toSql());
+        $this->assertSame([1, 2, 3], $query->getBindings());
+    }
+
     // -------------------------------------------------------------------------
     // orderBy()
     // -------------------------------------------------------------------------

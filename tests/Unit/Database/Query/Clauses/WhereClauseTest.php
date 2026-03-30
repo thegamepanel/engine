@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Query\Clauses;
 use Engine\Database\Exceptions\InvalidExpressionException;
 use Engine\Database\Query\Clauses\WhereClause;
 use Engine\Database\Query\Expressions\RawExpression;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -58,6 +59,96 @@ class WhereClauseTest extends TestCase
         $clause->where(function (WhereClause $query) {
             // intentionally empty
         });
+    }
+
+    /**
+     * - where() with the < operator produces correct SQL.
+     */
+    #[Test]
+    public function whereWithLessThanOperatorProducesCorrectSql(): void
+    {
+        $clause = new WhereClause();
+        $clause->where('age', '<', 18);
+
+        $this->assertSame('age < ?', $clause->toSql());
+        $this->assertSame([18], $clause->getBindings());
+    }
+
+    /**
+     * - where() with the <= operator produces correct SQL.
+     */
+    #[Test]
+    public function whereWithLessThanOrEqualOperatorProducesCorrectSql(): void
+    {
+        $clause = new WhereClause();
+        $clause->where('age', '<=', 18);
+
+        $this->assertSame('age <= ?', $clause->toSql());
+        $this->assertSame([18], $clause->getBindings());
+    }
+
+    /**
+     * - where() with the >= operator produces correct SQL.
+     */
+    #[Test]
+    public function whereWithGreaterThanOrEqualOperatorProducesCorrectSql(): void
+    {
+        $clause = new WhereClause();
+        $clause->where('age', '>=', 18);
+
+        $this->assertSame('age >= ?', $clause->toSql());
+        $this->assertSame([18], $clause->getBindings());
+    }
+
+    /**
+     * - where() with the > operator produces correct SQL.
+     */
+    #[Test]
+    public function whereWithGreaterThanOperatorProducesCorrectSql(): void
+    {
+        $clause = new WhereClause();
+        $clause->where('age', '>', 18);
+
+        $this->assertSame('age > ?', $clause->toSql());
+        $this->assertSame([18], $clause->getBindings());
+    }
+
+    /**
+     * - where() with the IS operator produces correct SQL.
+     */
+    #[Test]
+    public function whereWithIsOperatorProducesCorrectSql(): void
+    {
+        $clause = new WhereClause();
+        $clause->where('active', 'is', true);
+
+        $this->assertSame('active IS ?', $clause->toSql());
+        $this->assertSame([true], $clause->getBindings());
+    }
+
+    /**
+     * - where() with the != operator produces correct SQL.
+     */
+    #[Test]
+    public function whereWithNotEqualOperatorProducesCorrectSql(): void
+    {
+        $clause = new WhereClause();
+        $clause->where('status', '!=', 'banned');
+
+        $this->assertSame('status != ?', $clause->toSql());
+        $this->assertSame(['banned'], $clause->getBindings());
+    }
+
+    /**
+     * - where() with an invalid operator throws InvalidArgumentException.
+     */
+    #[Test]
+    public function whereWithInvalidOperatorThrowsException(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $clause = new WhereClause();
+        $clause->where('col', 'INVALID', 'value');
     }
 
     // -------------------------------------------------------------------------

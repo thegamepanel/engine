@@ -122,7 +122,7 @@ final class JoinClause implements Expression
             $bindings[] = $condition['bindings'];
         }
 
-        return array_merge(...$bindings ?: [[]]);
+        return array_merge(...$bindings);
     }
 
     public function isEmpty(): bool

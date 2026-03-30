@@ -58,6 +58,8 @@ final class Cursor
      * Get the number of rows in the result.
      *
      * @return int
+     *
+     * @codeCoverageIgnore Not reliably testable — rowCount() is driver-dependent for SELECT.
      */
     public function count(): int
     {
@@ -68,6 +70,8 @@ final class Cursor
      * Determine if the result is empty.
      *
      * @return bool
+     *
+     * @codeCoverageIgnore Not reliably testable — delegates to count() which is driver-dependent.
      */
     public function isEmpty(): bool
     {
