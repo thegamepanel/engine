@@ -24,7 +24,7 @@ class UpdateTest extends TestCase
     {
         $query = Update::table('users')->set(['name' => 'John', 'age' => 30]);
 
-        $this->assertSame('UPDATE users SET name = ?, age = ?', $query->toSql());
+        $this->assertSame('UPDATE users SET `name` = ?, `age` = ?', $query->toSql());
         $this->assertSame(['John', 30], $query->getBindings());
     }
 
@@ -38,7 +38,7 @@ class UpdateTest extends TestCase
             ->set(['hits' => RawExpression::make('hits + ?', [1])])
         ;
 
-        $this->assertSame('UPDATE counters SET hits = hits + ?', $query->toSql());
+        $this->assertSame('UPDATE counters SET `hits` = hits + ?', $query->toSql());
         $this->assertSame([1], $query->getBindings());
     }
 
@@ -56,7 +56,7 @@ class UpdateTest extends TestCase
             ])
         ;
 
-        $this->assertSame('UPDATE users SET name = ?, hits = hits + ?, age = ?', $query->toSql());
+        $this->assertSame('UPDATE users SET `name` = ?, `hits` = hits + ?, `age` = ?', $query->toSql());
         $this->assertSame(['John', 1, 30], $query->getBindings());
     }
 
@@ -71,7 +71,7 @@ class UpdateTest extends TestCase
             ->set(['age' => 30])
         ;
 
-        $this->assertSame('UPDATE users SET name = ?, age = ?', $query->toSql());
+        $this->assertSame('UPDATE users SET `name` = ?, `age` = ?', $query->toSql());
         $this->assertSame(['John', 30], $query->getBindings());
     }
 
@@ -90,7 +90,7 @@ class UpdateTest extends TestCase
             ->where('id', '=', 1)
         ;
 
-        $this->assertSame('UPDATE users SET name = ? WHERE id = ?', $query->toSql());
+        $this->assertSame('UPDATE users SET `name` = ? WHERE id = ?', $query->toSql());
         $this->assertSame(['John', 1], $query->getBindings());
     }
 
@@ -107,7 +107,7 @@ class UpdateTest extends TestCase
         ;
 
         $this->assertSame(
-            'UPDATE users SET status = ? WHERE role = ? OR age < ?',
+            'UPDATE users SET `status` = ? WHERE role = ? OR age < ?',
             $query->toSql(),
         );
         $this->assertSame(['inactive', 'guest', 18], $query->getBindings());
@@ -124,7 +124,7 @@ class UpdateTest extends TestCase
             ->whereNull('deleted_at')
         ;
 
-        $this->assertSame('UPDATE users SET status = ? WHERE deleted_at IS NULL', $query->toSql());
+        $this->assertSame('UPDATE users SET `status` = ? WHERE deleted_at IS NULL', $query->toSql());
     }
 
     /**
@@ -138,7 +138,7 @@ class UpdateTest extends TestCase
             ->whereIn('id', [1, 2, 3])
         ;
 
-        $this->assertSame('UPDATE users SET status = ? WHERE id IN (?, ?, ?)', $query->toSql());
+        $this->assertSame('UPDATE users SET `status` = ? WHERE id IN (?, ?, ?)', $query->toSql());
         $this->assertSame(['inactive', 1, 2, 3], $query->getBindings());
     }
 
@@ -157,7 +157,7 @@ class UpdateTest extends TestCase
             ->orderBy('created_at', 'asc')
         ;
 
-        $this->assertSame('UPDATE users SET status = ? ORDER BY created_at ASC', $query->toSql());
+        $this->assertSame('UPDATE users SET `status` = ? ORDER BY created_at ASC', $query->toSql());
         $this->assertSame(['inactive'], $query->getBindings());
     }
 
@@ -176,7 +176,7 @@ class UpdateTest extends TestCase
             ->limit(10)
         ;
 
-        $this->assertSame('UPDATE users SET status = ? LIMIT 10', $query->toSql());
+        $this->assertSame('UPDATE users SET `status` = ? LIMIT 10', $query->toSql());
         $this->assertSame(['inactive'], $query->getBindings());
     }
 
@@ -198,7 +198,7 @@ class UpdateTest extends TestCase
         ;
 
         $this->assertSame(
-            'UPDATE users SET status = ? WHERE active = ? ORDER BY created_at ASC LIMIT 100',
+            'UPDATE users SET `status` = ? WHERE active = ? ORDER BY created_at ASC LIMIT 100',
             $query->toSql(),
         );
         $this->assertSame(['inactive', false], $query->getBindings());
@@ -215,7 +215,7 @@ class UpdateTest extends TestCase
             ->where('name', '=', 'visits')
         ;
 
-        $this->assertSame('UPDATE counters SET hits = hits + ? WHERE name = ?', $query->toSql());
+        $this->assertSame('UPDATE counters SET `hits` = hits + ? WHERE name = ?', $query->toSql());
         $this->assertSame([1, 'visits'], $query->getBindings());
     }
 }

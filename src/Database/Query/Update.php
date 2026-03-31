@@ -55,9 +55,9 @@ final class Update implements Query
 
         foreach ($this->sets as $column => $value) {
             if ($value instanceof Expression) {
-                $setClauses[] = "{$column} = {$value->toSql()}";
+                $setClauses[] = "`{$column}` = {$value->toSql()}";
             } else {
-                $setClauses[] = "{$column} = ?";
+                $setClauses[] = "`{$column}` = ?";
             }
         }
 
