@@ -7,6 +7,11 @@ use Engine\Database\Contracts\Expression;
 
 final readonly class Raw implements Expression
 {
+    public static function from(string $sql): self
+    {
+        return new self($sql);
+    }
+
     /**
      * @param string                   $sql
      * @param array<int|string, mixed> $bindings

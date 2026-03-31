@@ -2,6 +2,13 @@
 
 namespace Engine\Database\Contracts;
 
+/**
+ * Expression Contract
+ * -------------------
+ *
+ * Represents an SQL expression that can be transformed into a query string
+ * and supports parameter bindings.
+ */
 interface Expression
 {
     /**
