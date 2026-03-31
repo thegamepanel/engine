@@ -114,6 +114,7 @@ class ConnectionTest extends TestCase
         $conn->transaction(function (Connection $c) {
             $c->execute('INSERT INTO test (name) VALUES (?)', ['Alice']);
         });
+        $this->assertFalse($conn->isInTransaction());
         $this->assertSame('Alice', $conn->query('SELECT * FROM test')->first()->get('name'));
     }
 

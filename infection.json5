@@ -61,11 +61,6 @@
         "Engine\\Database\\Query\\Concerns\\HasHavingClause::hasHavingClause::77"
       ]
     },
-    "MethodCallRemoval"  : {
-      "ignore": [
-        "Engine\\Database\\Connection::transaction::107"
-      ]
-    },
     "ReturnRemoval"      : {
       "ignore": [
         "Engine\\Container\\Container::invokeClassMethod::350",
