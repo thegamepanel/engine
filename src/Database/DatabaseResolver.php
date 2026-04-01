@@ -7,8 +7,8 @@ use Engine\Container\Container;
 use Engine\Container\Contracts\Resolver;
 use Engine\Container\Dependency;
 use Engine\Database\Attributes\Database;
-use ReflectionNamedType;
 use Engine\Database\Exceptions\DatabaseException;
+use ReflectionNamedType;
 
 /**
  * Database Resolver

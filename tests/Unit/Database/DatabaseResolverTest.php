@@ -15,12 +15,12 @@ use Engine\Database\Config\DatabaseConfig;
 use Engine\Database\Connection;
 use Engine\Database\ConnectionFactory;
 use Engine\Database\DatabaseResolver;
+use Engine\Database\Exceptions\DatabaseException;
 use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use Engine\Database\Exceptions\DatabaseException;
 use Tests\Unit\Database\Fixtures\ClassWithDatabaseDependency;
 use Tests\Unit\Database\Fixtures\ClassWithInvalidDatabaseType;
 
