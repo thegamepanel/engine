@@ -20,7 +20,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
-use RuntimeException;
+use Engine\Database\Exceptions\DatabaseException;
 use Tests\Unit\Database\Fixtures\ClassWithDatabaseDependency;
 use Tests\Unit\Database\Fixtures\ClassWithInvalidDatabaseType;
 
@@ -85,7 +85,7 @@ class DatabaseResolverTest extends TestCase
             resolvable: new class implements Resolvable {},
         );
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(DatabaseException::class);
         $this->expectExceptionMessage(Database::class);
 
         $resolver->resolve($dependency, $this->buildContainer());
@@ -104,7 +104,7 @@ class DatabaseResolverTest extends TestCase
         $resolver   = new DatabaseResolver($this->factoryWithConnections([]));
         $dependency = $this->dependencyFrom(ClassWithInvalidDatabaseType::class, 'connection');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(DatabaseException::class);
         $this->expectExceptionMessage(Connection::class);
 
         $resolver->resolve($dependency, $this->buildContainer());
@@ -123,7 +123,7 @@ class DatabaseResolverTest extends TestCase
             resolvable: new Database(),
         );
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(DatabaseException::class);
         $this->expectExceptionMessage(Connection::class);
 
         $resolver->resolve($dependency, $this->buildContainer());

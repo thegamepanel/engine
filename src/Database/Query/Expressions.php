@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Engine\Database\Query;
 
 use Engine\Database\Contracts\Expression;
+use Engine\Database\Exceptions\InvalidExpressionException;
 use Engine\Database\Query\Expressions\Aggregate;
 use Engine\Database\Query\Expressions\ColumnEqualTo;
 use Engine\Database\Query\Expressions\ColumnGreaterThen;
@@ -18,7 +19,6 @@ use Engine\Database\Query\Expressions\ColumnNotEqualTo;
 use Engine\Database\Query\Expressions\ColumnNotIn;
 use Engine\Database\Query\Expressions\MatchAgainst;
 use Engine\Database\Query\Expressions\RawExpression;
-use InvalidArgumentException;
 
 final class Expressions
 {
@@ -36,7 +36,7 @@ final class Expressions
             '!='          => ColumnNotEqualTo::make($column, $value),
             'in'          => ColumnIn::make($column, $value),    // @phpstan-ignore-line
             'not in'      => ColumnNotIn::make($column, $value), // @phpstan-ignore-line
-            default       => throw new InvalidArgumentException(sprintf('Invalid operator "%s".', $operator)),
+            default       => throw InvalidExpressionException::invalidOperator($operator),
         };
     }
 

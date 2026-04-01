@@ -18,4 +18,9 @@ final class InvalidExpressionException extends InvalidArgumentException
             sprintf('Cannot use an empty array for an IN clause on column "%s".', $column),
         );
     }
+
+    public static function invalidOperator(string $operator): self
+    {
+        return new self(sprintf('Invalid operator "%s".', $operator));
+    }
 }

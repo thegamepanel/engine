@@ -8,14 +8,12 @@ use PDOStatement;
 
 final class Result
 {
-    private PDOStatement $statement;
-
     /**
      * @var array<string|int, mixed>
-     *
-     * @phpstan-ignore property.onlyWritten
      */
-    private array $bindings;
+    public readonly array $bindings;
+
+    private PDOStatement $statement;
 
     /**
      * @var array<Row>|null

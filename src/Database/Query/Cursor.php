@@ -9,14 +9,12 @@ use PDOStatement;
 
 final class Cursor
 {
-    private PDOStatement $statement;
-
     /**
      * @var array<string|int, mixed>
-     *
-     * @phpstan-ignore property.onlyWritten
      */
-    private array $bindings;
+    public readonly array $bindings;
+
+    private PDOStatement $statement;
 
     /**
      * @param PDOStatement             $statement

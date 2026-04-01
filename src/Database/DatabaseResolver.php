@@ -8,7 +8,7 @@ use Engine\Container\Contracts\Resolver;
 use Engine\Container\Dependency;
 use Engine\Database\Attributes\Database;
 use ReflectionNamedType;
-use RuntimeException;
+use Engine\Database\Exceptions\DatabaseException;
 
 /**
  * Database Resolver
@@ -46,7 +46,7 @@ final readonly class DatabaseResolver implements Resolver
         $database = $dependency->resolvable;
 
         if (! $database instanceof Database) {
-            throw new RuntimeException(sprintf(
+            throw new DatabaseException(sprintf(
                 'The database connection resolver can only resolve parameters using the "%s" attribute.',
                 Database::class,
             ));
@@ -56,7 +56,7 @@ final readonly class DatabaseResolver implements Resolver
             ! $dependency->type instanceof ReflectionNamedType
             || $dependency->type->getName() !== Connection::class
         ) {
-            throw new RuntimeException(sprintf(
+            throw new DatabaseException(sprintf(
                 'The database connection resolver can only resolve parameters of the type "%s".',
                 Connection::class,
             ));

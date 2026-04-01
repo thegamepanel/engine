@@ -6,7 +6,6 @@ namespace Tests\Unit\Database\Query\Clauses;
 use Engine\Database\Exceptions\InvalidExpressionException;
 use Engine\Database\Query\Clauses\WhereClause;
 use Engine\Database\Query\Expressions\RawExpression;
-use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -145,7 +144,8 @@ class WhereClauseTest extends TestCase
     #[Test]
     public function whereWithInvalidOperatorThrowsException(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidExpressionException::class);
+        $this->expectExceptionMessage('Invalid operator "INVALID".');
 
         $clause = new WhereClause();
         $clause->where('col', 'INVALID', 'value');

@@ -17,7 +17,7 @@ class RawTest extends TestCase
     #[Test]
     public function rawQueryReturnsSqlAndBindings(): void
     {
-        $raw = new Raw('SELECT * FROM users WHERE id = ?', [1]);
+        $raw = Raw::from('SELECT * FROM users WHERE id = ?', [1]);
 
         $this->assertSame('SELECT * FROM users WHERE id = ?', $raw->toSql());
         $this->assertSame([1], $raw->getBindings());
@@ -29,7 +29,7 @@ class RawTest extends TestCase
     #[Test]
     public function rawQueryDefaultsToEmptyBindings(): void
     {
-        $raw = new Raw('SELECT 1');
+        $raw = Raw::from('SELECT 1');
 
         $this->assertSame('SELECT 1', $raw->toSql());
         $this->assertSame([], $raw->getBindings());

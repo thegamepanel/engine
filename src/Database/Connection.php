@@ -171,11 +171,29 @@ final readonly class Connection
     {
         try {
             $statement = $this->pdo->prepare($query);
-            $statement->execute($bindings);
+            $statement->execute($this->processBindings($bindings));
 
             return $statement;
         } catch (PDOException $e) {
             throw new QueryException($query, $bindings, previous: $e);
         }
+    }
+
+    /**
+     * Process the given bindings.
+     *
+     * Processes bindings to better prepare them for execution. Currently,
+     * converts <code>bool</code> to <code>int</code>.
+     *
+     * @param array<int|string, mixed> $bindings
+     *
+     * @return array<int|string, mixed>
+     */
+    private function processBindings(array $bindings): array
+    {
+        return array_map(
+            static fn (mixed $value): mixed => is_bool($value) ? (int) $value : $value,
+            $bindings,
+        );
     }
 }
