@@ -72,6 +72,14 @@ final class Column implements Expression
     }
 
     /**
+     * Create a CHAR column.
+     */
+    public static function char(string $name, int $length): self
+    {
+        return new self($name, "CHAR({$length})");
+    }
+
+    /**
      * Create a TEXT column.
      */
     public static function text(string $name): self

@@ -117,6 +117,18 @@ class ColumnTest extends TestCase
     }
 
     /**
+     * - char() produces the correct SQL with name and length.
+     */
+    #[Test]
+    public function charProducesCorrectSql(): void
+    {
+        $column = Column::char('code', 2);
+
+        $this->assertSame('`code` CHAR(2) NOT NULL', $column->toSql());
+        $this->assertSame([], $column->getBindings());
+    }
+
+    /**
      * - text produces TEXT column definition.
      */
     #[Test]
