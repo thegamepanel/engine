@@ -246,6 +246,25 @@ class ConnectionTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // processBindings()
+    // -------------------------------------------------------------------------
+
+    /**
+     * - processBindings() converts boolean values to integers.
+     */
+    #[Test]
+    public function processBindingsConvertsBoolsToInts(): void
+    {
+        $conn   = $this->connection();
+        $method = new \ReflectionMethod($conn, 'processBindings');
+
+        $this->assertSame(
+            [1, 0, 'hello', 42, null],
+            $method->invoke($conn, [true, false, 'hello', 42, null]),
+        );
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 

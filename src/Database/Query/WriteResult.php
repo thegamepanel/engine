@@ -4,14 +4,25 @@ namespace Engine\Database\Query;
 
 final readonly class WriteResult
 {
+    /**
+     * @var array<string|int, mixed>
+     */
+    public readonly array $bindings;
+
     private int $affectedRows;
 
     private ?string $lastInsertId;
 
-    public function __construct(int $affectedRows, ?string $lastInsertId)
+    /**
+     * @param int                      $affectedRows
+     * @param string|null              $lastInsertId
+     * @param array<string|int, mixed> $bindings
+     */
+    public function __construct(int $affectedRows, ?string $lastInsertId, array $bindings = [])
     {
         $this->affectedRows = $affectedRows;
         $this->lastInsertId = $lastInsertId;
+        $this->bindings     = $bindings;
     }
 
     /**

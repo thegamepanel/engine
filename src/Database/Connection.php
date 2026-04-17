@@ -58,8 +58,9 @@ final readonly class Connection
 
         try {
             return new WriteResult(
-                affectedRows: $this->statement($query, $bindings)->rowCount(),
-                lastInsertId: $this->pdo->lastInsertId() ?: null,
+                $this->statement($query, $bindings)->rowCount(),
+                $this->pdo->lastInsertId() ?: null,
+                $bindings,
             );
             // @codeCoverageIgnoreStart
         } catch (PDOException $e) {
