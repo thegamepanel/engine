@@ -10,35 +10,103 @@
     "html": "build/infection.html"
   },
   "mutators": {
-    "@default"     : true,
-    "TrueValue"    : {
+    "@default"                   : true,
+    "TrueValue"                  : {
       "ignore": [
-        "Engine\\Container\\Container::lazy"
+        "Engine\\Container\\Container::lazy",
+        "Engine\\Database\\Schema\\Columns\\BaseColumn::first"
       ]
     },
-    "FalseValue"   : {
+    "FalseValue"                 : {
       "ignore": [
-        "Engine\\Container\\Container::resolve"
+        "Engine\\Container\\Container::resolve",
+        "Engine\\Database\\Schema\\Columns\\BaseColumn::notNull"
       ]
     },
-    "Break_"       : {
+    "Break_"                     : {
       "ignore": [
         "Engine\\Container\\Container::collectDependencies::392"
       ]
     },
-    "Coalesce"     : {
+    "Coalesce"                   : {
       "ignore": [
         "Engine\\Container\\Resolvers\\GenericResolver::resolve::56",
+        "Engine\\Database\\ConnectionFactory::make::62"
       ]
     },
-    "IfNegation"   : {
+    "DecrementInteger"           : {
+      "ignore": [
+        "Engine\\Database\\Query\\Expressions\\ColumnIn::toSql::38",
+        "Engine\\Database\\Query\\Expressions\\ColumnNotIn::toSql::38",
+        "Engine\\Database\\Query\\Insert::toSql::95",
+        "Engine\\Database\\Query\\Insert::toSql::96",
+        "Engine\\Values\\ValueGetter::array::64"
+      ]
+    },
+    "IncrementInteger"           : {
+      "ignore": [
+        "Engine\\Database\\Query\\Expressions\\ColumnIn::toSql::38",
+        "Engine\\Database\\Query\\Expressions\\ColumnNotIn::toSql::38",
+        "Engine\\Database\\Query\\Insert::toSql::95",
+        "Engine\\Database\\Query\\Insert::toSql::96",
+        "Engine\\Values\\ValueGetter::array::64"
+      ]
+    },
+    "Assignment"                 : {
+      "ignore": [
+        "Engine\\Database\\Query\\Concerns\\HasLimitClause::buildLimitClause::45"
+      ]
+    },
+    "ProtectedVisibility"        : {
+      "ignore": [
+        "Engine\\Database\\Query\\Concerns\\HasWhereClause",
+        "Engine\\Database\\Query\\Concerns\\HasHavingClause",
+        "Engine\\Database\\Schema\\Concerns\\CanBeUnsigned",
+        "Engine\\Database\\Schema\\Concerns\\HasCharsetAndCollation",
+        "Engine\\Database\\Schema\\Concerns\\HasComment",
+        "Engine\\Database\\Schema\\Concerns\\HasDefault",
+        "Engine\\Database\\Schema\\Concerns\\HasLength",
+        "Engine\\Database\\Schema\\Columns\\BaseColumn::isGenerated"
+      ]
+    },
+    "ConcatOperandRemoval"       : {
+      "ignore": [
+        "Engine\\Database\\Schema\\Columns\\DecimalColumn::__construct::102",
+        "Engine\\Database\\Schema\\Columns\\IntColumn::__construct::127",
+        "Engine\\Database\\Schema\\Columns\\EnumColumn::__construct::82",
+        "Engine\\Database\\Schema\\Create\\CreateTable::toSql::153",
+        "Engine\\Database\\Schema\\Create\\CreateTable::toSql::179",
+        "Engine\\Database\\Schema\\Alter\\AlterTable::toSql::243"
+      ]
+    },
+    "Concat"                     : {
+      "ignore": [
+        "Engine\\Database\\Schema\\Columns\\DecimalColumn::__construct::102",
+        "Engine\\Database\\Schema\\Columns\\IntColumn::__construct::127",
+        "Engine\\Database\\Schema\\Columns\\EnumColumn::__construct::82"
+      ]
+    },
+    "LogicalOrAllSubExprNegation": {
+      "ignore": [
+        "Engine\\Database\\Schema\\Columns\\BaseColumn::addDefaultSyntax"
+      ]
+    },
+    "ReturnRemoval"              : {
+      "ignore": [
+        "Engine\\Container\\Container::invokeClassMethod::350",
+        "Engine\\Database\\Query\\Concerns\\HasJoinClause::buildJoinClause::97",
+        "Engine\\Values\\ValueGetter::float::110",
+        "Engine\\Values\\ValueGetter::int::135"
+      ]
+    },
+    "MatchArmRemoval"            : {
+      "ignore": [
+        "Engine\\Database\\ConnectionFactory::createPdo::107"
+      ]
+    },
+    "IfNegation"                 : {
       "ignore": [
         "Engine\\Container\\Container::invokeClassMethod::349"
-      ]
-    },
-    "ReturnRemoval": {
-      "ignore": [
-        "Engine\\Container\\Container::invokeClassMethod::350"
       ]
     }
   }

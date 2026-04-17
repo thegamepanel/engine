@@ -5,6 +5,35 @@ on: [ pull_request ]
 jobs:
   run:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: engine_test
+          MYSQL_USER: engine
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+      mysql_secondary:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: engine_test_port
+          MYSQL_USER: engine
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -14,9 +43,47 @@ jobs:
         with:
           php-version: '8.5'
           coverage: pcov
+          ini-values: zend.assertions=1
 
       - name: Install dependencies
         run: composer self-update && composer install && composer dump-autoload
 
+      - name: Start MySQL socket container
+        run: |
+          mkdir -p /tmp/mysql_socket
+          chmod 777 /tmp/mysql_socket
+          docker run -d \
+            --name mysql_socket \
+            -e MYSQL_ROOT_PASSWORD=secret \
+            -e MYSQL_DATABASE=engine_test_socket \
+            -e MYSQL_USER=engine \
+            -e MYSQL_PASSWORD=secret \
+            -v /tmp/mysql_socket:/var/run/mysqld \
+            mysql:8.4
+          for i in $(seq 1 30); do
+            docker exec mysql_socket mysqladmin ping -u root -psecret -h 127.0.0.1 --silent 2>/dev/null && break
+            sleep 2
+          done
+          for i in $(seq 1 10); do
+            [ -S /tmp/mysql_socket/mysqld.sock ] && break
+            sleep 1
+          done
+          [ -S /tmp/mysql_socket/mysqld.sock ] || { echo "ERROR: socket file not found"; docker logs mysql_socket; exit 1; }
+          docker exec mysql_socket mysql -u root -psecret -h 127.0.0.1 -e "
+            CREATE USER IF NOT EXISTS 'engine'@'localhost' IDENTIFIED BY 'secret';
+            GRANT ALL PRIVILEGES ON \`engine_test_socket\`.* TO 'engine'@'localhost';
+            FLUSH PRIVILEGES;
+          "
+
       - name: Run mutation testing
         run: composer mutation
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: engine_test
+          DB_USERNAME: engine
+          DB_PASSWORD: secret
+          DB_PORT_SECONDARY: 3307
+          DB_DATABASE_SECONDARY: engine_test_port
+          DB_SOCKET: /tmp/mysql_socket/mysqld.sock
+          DB_DATABASE_SOCKET: engine_test_socket
