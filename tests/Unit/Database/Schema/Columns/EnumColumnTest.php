@@ -147,9 +147,9 @@ class EnumColumnTest extends TestCase
     public static function validValues(): array
     {
         return [
-            'string array'       => [['active', 'inactive'], "'active', 'inactive'", 'active'],
-            'backed enum'        => [StatusEnum::class, "'active', 'inactive'", 'active'],
-            'int backed enum'    => [IntBackedEnum::class, "'200', '404'", '200'],
+            'string array'    => [['active', 'inactive'], "'active', 'inactive'", 'active'],
+            'backed enum'     => [StatusEnum::class, "'active', 'inactive'", 'active'],
+            'int backed enum' => [IntBackedEnum::class, "'200', '404'", '200'],
         ];
     }
 
@@ -187,6 +187,17 @@ class EnumColumnTest extends TestCase
         EnumColumn::set('status', $values);
     }
 
+    /**
+     * @return array<string, array{array<string>|class-string<\BackedEnum>}>
+     */
+    public static function emptyValues(): array
+    {
+        return [
+            'empty array'        => [[]],
+            'enum without cases' => [EmptyEnum::class],
+        ];
+    }
+
     #[Test]
     public function enumRejectsNonBackedEnum(): void
     {
@@ -201,16 +212,5 @@ class EnumColumnTest extends TestCase
         $this->expectException(\AssertionError::class);
 
         EnumColumn::set('status', BasicEnum::class);
-    }
-
-    /**
-     * @return array<string, array{array<string>|class-string<\BackedEnum>}>
-     */
-    public static function emptyValues(): array
-    {
-        return [
-            'empty array'        => [[]],
-            'enum without cases' => [EmptyEnum::class],
-        ];
     }
 }
