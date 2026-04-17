@@ -33,7 +33,7 @@ class ValueGetter
             return match ($value) {
                 'true', '1', 'yes' => true,
                 'false', '0', 'no' => false,
-                default => throw InvalidValueCastException::cannotCast($name, 'a boolean'),
+                default            => throw InvalidValueCastException::cannotCast($name, 'a boolean'),
             };
         }
 

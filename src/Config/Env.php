@@ -231,7 +231,7 @@ final class Env
             return match ($value) {
                 'true', '1', 'yes' => true,
                 'false', '0', 'no' => false,
-                default => throw InvalidEnvException::make($key, 'bool'),
+                default            => throw InvalidEnvException::make($key, 'bool'),
             };
         }
 
