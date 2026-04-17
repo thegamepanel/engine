@@ -34,7 +34,4 @@
     <logging>
         <junit outputFile="build/report.junit.xml"/>
     </logging>
-    <php>
-        <ini name="zend.assertions" value="1"/>
-    </php>
 </phpunit>
