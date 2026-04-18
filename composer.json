@@ -21,7 +21,8 @@
     "jetbrains/phpstorm-attributes": "^1.2",
     "phpstan/phpstan-phpunit"      : "^2.0",
     "infection/infection"          : "^0.32.6",
-    "friendsofphp/php-cs-fixer"    : "^3.94"
+    "friendsofphp/php-cs-fixer"    : "^3.94",
+    "brianium/paratest"            : "^7.22"
   },
   "autoload"    : {
     "psr-4": {
@@ -41,7 +42,7 @@
     }
   },
   "scripts"     : {
-    "test"    : "@php vendor/bin/phpunit",
+    "test"    : "@php vendor/bin/paratest",
     "mutation": "@php vendor/bin/infection --threads=max --no-progress",
     "analyze" : "@php vendor/bin/phpstan analyse src --memory-limit=2G",
     "tidy"    : "@php vendor/bin/php-cs-fixer fix"
