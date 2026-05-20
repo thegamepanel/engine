@@ -380,6 +380,20 @@ class ExceptionsTest extends TestCase
     }
 
     /**
+     * - dottedModuleOrName() includes the module and name in the message.
+     */
+    #[Test]
+    public function configLifecycleDottedModuleOrName(): void
+    {
+        $e = ConfigLifecycleException::dottedModuleOrName('admin.v2', 'main');
+
+        $this->assertSame(
+            'Module and config names must not contain dots; got module "admin.v2", name "main".',
+            $e->getMessage(),
+        );
+    }
+
+    /**
      * - ConfigLifecycleException extends LogicException.
      */
     #[Test]

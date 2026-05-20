@@ -134,6 +134,36 @@ class ConfigRegistryTest extends TestCase
     }
 
     /**
+     * - register() rejects a module name containing a dot.
+     */
+    #[Test]
+    public function registerWithDottedModuleNameThrows(): void
+    {
+        $registry = new ConfigRegistry(tree: [], coreMapping: []);
+        $registry->sealCore();
+
+        $this->expectException(ConfigLifecycleException::class);
+        $this->expectExceptionMessage('must not contain dots');
+
+        $registry->register('admin.v2', 'main', TestConfigObject::class);
+    }
+
+    /**
+     * - register() rejects a config name containing a dot.
+     */
+    #[Test]
+    public function registerWithDottedConfigNameThrows(): void
+    {
+        $registry = new ConfigRegistry(tree: [], coreMapping: []);
+        $registry->sealCore();
+
+        $this->expectException(ConfigLifecycleException::class);
+        $this->expectExceptionMessage('must not contain dots');
+
+        $registry->register('admin', 'main.v2', TestConfigObject::class);
+    }
+
+    /**
      * - register() succeeds in the middle phase and stores the registration.
      *
      * (We verify storage indirectly via seal() in a later task; here we just

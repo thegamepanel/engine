@@ -41,6 +41,15 @@ final class ConfigLifecycleException extends LogicException implements ConfigExc
         ));
     }
 
+    public static function dottedModuleOrName(string $module, string $name): self
+    {
+        return new self(sprintf(
+            'Module and config names must not contain dots; got module "%s", name "%s".',
+            $module,
+            $name,
+        ));
+    }
+
     public static function readBeforeCoreSeal(): self
     {
         return new self('Configs cannot be read from the registry before sealCore() has been called.');

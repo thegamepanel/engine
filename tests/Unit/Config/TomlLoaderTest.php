@@ -18,6 +18,8 @@ class TomlLoaderTest extends TestCase
 
     protected function setUp(): void
     {
+        Env::destroy();
+
         $this->fixtureRoot = __DIR__ . '/Fixtures/toml';
         $previous          = $_ENV;
         $_ENV              = [];
@@ -285,6 +287,21 @@ class TomlLoaderTest extends TestCase
         $tree = new TomlLoader()->load($this->pathsFor('modules'));
 
         $this->assertSame(['admin', 'billing'], $tree['__enabled_modules']);
+    }
+
+    /**
+     * - A module filename containing a dot is rejected (dots would clash with the section separator).
+     */
+    #[Test]
+    public function modulesEnabledFileWithDotInIdentifierThrows(): void
+    {
+        try {
+            new TomlLoader()->load($this->pathsFor('dotted-module'));
+            $this->fail('Expected InvalidConfigException.');
+        } catch (InvalidConfigException $e) {
+            $this->assertStringContainsString('admin.v2', $e->getMessage());
+            $this->assertStringContainsString('contains a dot', $e->getMessage());
+        }
     }
 
     /**

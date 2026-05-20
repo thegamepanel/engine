@@ -19,6 +19,8 @@ class EndToEndTest extends TestCase
 {
     protected function setUp(): void
     {
+        Env::destroy();
+
         $previous = $_ENV;
         $_ENV     = [
             'APP_NAME'    => 'EngineTest',

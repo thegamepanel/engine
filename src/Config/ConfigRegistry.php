@@ -70,7 +70,7 @@ final class ConfigRegistry
                 );
             }
 
-            /** @var array<string, mixed> $section */
+            /** @var array<array-key, mixed> $section */
             $this->hydratedCore[$class] = $this->hydrate(
                 class: $class,
                 data: $section,
@@ -135,6 +135,10 @@ final class ConfigRegistry
             throw ConfigLifecycleException::registerAsCore($module);
         }
 
+        if (str_contains($module, '.') || str_contains($name, '.')) {
+            throw ConfigLifecycleException::dottedModuleOrName($module, $name);
+        }
+
         $this->moduleRegistrations[$class] = [
             'module'  => $module,
             'name'    => $name,
@@ -191,7 +195,7 @@ final class ConfigRegistry
      * Hydrate a single section through its config class, wrapping any failure.
      *
      * @param class-string<ConfigObject> $class
-     * @param array<string, mixed>       $data
+     * @param array<array-key, mixed>    $data
      * @param string                     $file
      * @param string                     $section
      *
@@ -217,11 +221,11 @@ final class ConfigRegistry
      * Walk a dotted path into the tree. Missing intermediate -> [].
      * Non-array intermediate -> InvalidConfigException.
      *
-     * @param array<string, mixed> $tree
-     * @param string               $dottedPath
-     * @param string               $file
+     * @param array<array-key, mixed> $tree
+     * @param string                  $dottedPath
+     * @param string                  $file
      *
-     * @return array<string, mixed>
+     * @return array<array-key, mixed>
      *
      * @throws InvalidConfigException
      */
@@ -254,7 +258,7 @@ final class ConfigRegistry
             );
         }
 
-        /** @var array<string, mixed> $current */
+        /** @var array<array-key, mixed> $current */
         return $current;
     }
 }

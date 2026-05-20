@@ -151,7 +151,15 @@ final class TomlLoader
         $enabledList = [];
 
         foreach ($files as $file) {
-            $name               = basename($file, '.toml');
+            $name = basename($file, '.toml');
+
+            if (str_contains($name, '.')) {
+                throw InvalidConfigException::fileReadError(
+                    $file,
+                    sprintf('Module identifier "%s" contains a dot; module filenames must not contain dots (the loader uses them as section separators).', $name),
+                );
+            }
+
             $moduleTrees[$name] = $this->parse($file);
             $enabledList[]      = $name;
         }
@@ -251,6 +259,15 @@ final class TomlLoader
     }
 
     /**
+     * Whether the array is shaped like an indexed list (vs an associative table).
+     *
+     * Unlike PHP's array_is_list(), this returns false for an empty array — an
+     * empty drop-in file parses to [] and we want it to merge as a no-op rather
+     * than wholesale-replace the base tree. The wholesale-replacement semantic
+     * (the `if ($this->isIndexed($left) || $this->isIndexed($right))` short
+     * circuit in deepMerge) is reserved for non-empty lists where the intent is
+     * unambiguous.
+     *
      * @param array<int|string, mixed> $array
      *
      * @return bool

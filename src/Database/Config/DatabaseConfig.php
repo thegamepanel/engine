@@ -37,7 +37,7 @@ final readonly class DatabaseConfig implements ConfigObject
      * Creates a new instance of the config object using the provided data
      * pulled from the config storage.
      *
-     * @param array<string, mixed> $data
+     * @param array<array-key, mixed> $data
      *
      * @return static
      */
