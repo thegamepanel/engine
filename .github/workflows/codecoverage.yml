@@ -3,7 +3,7 @@ name: Code Coverage
 on: [ pull_request ]
 
 jobs:
-  run:
+  codecoverage:
     name: Code Coverage
     runs-on: ubuntu-latest
     services:

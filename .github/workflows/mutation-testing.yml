@@ -3,8 +3,7 @@ name: Mutation Testing
 on: [ pull_request ]
 
 jobs:
-  run:
-    name: Mutation Testing
+  mutation-testing:
     runs-on: ubuntu-latest
     services:
       mysql:
