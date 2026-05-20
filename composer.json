@@ -46,7 +46,13 @@
   "scripts"     : {
     "test"    : "@php vendor/bin/paratest",
     "mutation": "@php vendor/bin/infection --threads=max --no-progress",
-    "analyze" : "@php vendor/bin/phpstan analyse src --memory-limit=2G",
-    "tidy"    : "@php vendor/bin/php-cs-fixer fix"
+    "analyse" : "@php vendor/bin/phpstan analyse src --memory-limit=2G",
+    "tidy"    : "@php vendor/bin/php-cs-fixer fix",
+    "suite"   : [
+      "@tidy",
+      "@analyse",
+      "@test",
+      "@mutation"
+    ]
   }
 }
