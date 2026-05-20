@@ -299,6 +299,17 @@ class ExceptionsTest extends TestCase
     }
 
     /**
+     * - sealBeforeCoreSeal() produces the expected message.
+     */
+    #[Test]
+    public function configLifecycleSealBeforeCoreSeal(): void
+    {
+        $e = ConfigLifecycleException::sealBeforeCoreSeal();
+
+        $this->assertSame('seal() cannot be called before sealCore().', $e->getMessage());
+    }
+
+    /**
      * - registerBeforeCoreSeal() produces the expected message.
      */
     #[Test]

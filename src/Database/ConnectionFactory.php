@@ -9,6 +9,7 @@ use Engine\Database\Exceptions\ConnectionException;
 use Engine\Database\Exceptions\DatabaseException;
 use PDO;
 use PDOException;
+use Webmozart\Assert\Assert;
 
 /**
  * Connection factory
@@ -132,8 +133,12 @@ final class ConnectionFactory
             );
         }
 
-        // ConnectionConfig guarantees a non-null host when socket is null, so
-        // we don't need a fallback branch here.
+        // ConnectionConfig's constructor invariants guarantee these are
+        // non-null when socket is null. The asserts encode that invariant
+        // for both PHPStan and any future maintainer.
+        Assert::notNull($config->host, 'Host must be set when socket is null.');
+        Assert::notNull($config->port, 'Port must be set when socket is null.');
+
         return sprintf(
             'mysql:host=%s;port=%d;dbname=%s',
             $config->host,

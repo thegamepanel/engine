@@ -25,8 +25,9 @@ final readonly class ModulesEnabled implements ConfigObject
      * Create a new ModulesEnabled object from an array.
      *
      * The input is expected to be a list of strings (each a module identifier).
+     * Associative-keyed inputs are also accepted and reindexed to a list.
      *
-     * @param array<string, mixed> $data
+     * @param array<array-key, mixed> $data
      *
      * @return static
      */

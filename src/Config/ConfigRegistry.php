@@ -60,9 +60,17 @@ final class ConfigRegistry
         }
 
         foreach ($this->coreMapping as $tomlKey => $class) {
-            /** @var array<string, mixed> $section */
             $section = $this->tree[$tomlKey] ?? [];
 
+            if (! is_array($section)) {
+                throw InvalidConfigException::hydrationFailed(
+                    file: 'config.toml',
+                    section: $tomlKey,
+                    message: 'Expected an array at the section path.',
+                );
+            }
+
+            /** @var array<string, mixed> $section */
             $this->hydratedCore[$class] = $this->hydrate(
                 class: $class,
                 data: $section,
@@ -146,6 +154,10 @@ final class ConfigRegistry
             throw ConfigLifecycleException::alreadySealed();
         }
 
+        if (! $this->coreSealed) {
+            throw ConfigLifecycleException::sealBeforeCoreSeal();
+        }
+
         /** @var array<string, array<string, ConfigObject>> $nested */
         $nested = [];
 
@@ -157,12 +169,13 @@ final class ConfigRegistry
 
         foreach ($this->moduleRegistrations as $class => $registration) {
             /** @var class-string<ConfigObject> $class */
-            $section = $this->pluck($this->tree, $registration['section']);
+            $moduleFile = 'modules-enabled/' . $registration['module'] . '.toml';
+            $section    = $this->pluck($this->tree, $registration['section'], $moduleFile);
 
             $hydrated = $this->hydrate(
                 class: $class,
                 data: $section,
-                file: 'modules-enabled/' . $registration['module'] . '.toml',
+                file: $moduleFile,
                 section: $registration['name'],
             );
 
@@ -206,12 +219,13 @@ final class ConfigRegistry
      *
      * @param array<string, mixed> $tree
      * @param string               $dottedPath
+     * @param string               $file
      *
      * @return array<string, mixed>
      *
      * @throws InvalidConfigException
      */
-    private function pluck(array $tree, string $dottedPath): array
+    private function pluck(array $tree, string $dottedPath, string $file): array
     {
         $segments = explode('.', $dottedPath);
         $current  = $tree;
@@ -219,7 +233,7 @@ final class ConfigRegistry
         foreach ($segments as $segment) {
             if (! is_array($current)) {
                 throw InvalidConfigException::hydrationFailed(
-                    file: 'config tree',
+                    file: $file,
                     section: $dottedPath,
                     message: 'Expected an array at intermediate path segment.',
                 );
@@ -234,7 +248,7 @@ final class ConfigRegistry
 
         if (! is_array($current)) {
             throw InvalidConfigException::hydrationFailed(
-                file: 'config tree',
+                file: $file,
                 section: $dottedPath,
                 message: 'Expected an array at the section path.',
             );

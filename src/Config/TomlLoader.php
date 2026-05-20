@@ -37,9 +37,13 @@ final class TomlLoader
     public function load(ConfigPaths $paths): array
     {
         $tree = $this->readMain($paths->configFile);
-        $tree = $this->mergeDropIns($tree, $this->readDropIns($paths->configDir));
-
         $this->assertNoReservedKeys($tree, $paths->configFile);
+
+        foreach ($this->readDropIns($paths->configDir) as $file => $dropIn) {
+            $this->assertNoReservedKeys($dropIn, $file);
+            /** @var array<string, mixed> $tree */
+            $tree = $this->deepMerge($tree, $dropIn);
+        }
 
         [$moduleTrees, $enabledList] = $this->readModulesEnabled($paths->modulesEnabledDir);
 
@@ -211,40 +215,18 @@ final class TomlLoader
         $parsed = [];
 
         foreach ($files as $file) {
-            $parsed[basename($file)] = $this->parse($file);
+            $parsed[$file] = $this->parse($file);
         }
 
         return $parsed;
     }
 
     /**
-     * Deep-merge drop-ins into the base tree.
+     * Deep-merge a drop-in into the base tree.
      *
      * Scalars: last-wins. Nested tables: merge recursively. Indexed arrays
      * (including arrays-of-tables): wholesale replacement.
      *
-     * @param array<string, mixed>                $base
-     * @param array<string, array<string, mixed>> $dropIns
-     *
-     * @return array<string, mixed>
-     */
-    private function mergeDropIns(array $base, array $dropIns): array
-    {
-        foreach ($dropIns as $dropIn) {
-            foreach ($dropIn as $key => $value) {
-                if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
-                    $base[$key] = $this->deepMerge($base[$key], $value);
-                    continue;
-                }
-
-                $base[$key] = $value;
-            }
-        }
-
-        return $base;
-    }
-
-    /**
      * @param array<int|string, mixed> $left
      * @param array<int|string, mixed> $right
      *

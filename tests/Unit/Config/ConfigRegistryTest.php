@@ -59,6 +59,30 @@ class ConfigRegistryTest extends TestCase
     }
 
     /**
+     * - sealCore() throws when the tree's section is not an array.
+     */
+    #[Test]
+    public function sealCoreThrowsWhenSectionIsNotArray(): void
+    {
+        $registry = new ConfigRegistry(
+            tree: [
+                '__enabled_modules' => 'not-an-array',
+            ],
+            coreMapping: [
+                '__enabled_modules' => ModulesEnabled::class,
+            ],
+        );
+
+        try {
+            $registry->sealCore();
+            $this->fail('Expected InvalidConfigException.');
+        } catch (InvalidConfigException $e) {
+            $this->assertStringContainsString('__enabled_modules', $e->getMessage());
+            $this->assertStringContainsString('Expected an array', $e->getMessage());
+        }
+    }
+
+    /**
      * - sealCore() with a missing tree section hydrates the core class from an empty array.
      */
     #[Test]
@@ -205,6 +229,20 @@ class ConfigRegistryTest extends TestCase
         $registry->seal();
 
         $this->expectException(ConfigLifecycleException::class);
+        $registry->seal();
+    }
+
+    /**
+     * - seal() before sealCore() throws.
+     */
+    #[Test]
+    public function sealBeforeCoreSealThrows(): void
+    {
+        $registry = new ConfigRegistry(tree: [], coreMapping: []);
+
+        $this->expectException(ConfigLifecycleException::class);
+        $this->expectExceptionMessage('seal() cannot be called before sealCore()');
+
         $registry->seal();
     }
 
@@ -384,6 +422,7 @@ class ConfigRegistryTest extends TestCase
             $registry->seal();
             $this->fail('Expected InvalidConfigException.');
         } catch (InvalidConfigException $e) {
+            $this->assertStringContainsString('modules-enabled/broken.toml', $e->getMessage());
             $this->assertStringContainsString('modules.broken.main', $e->getMessage());
             $this->assertStringContainsString('intermediate path segment', $e->getMessage());
         }
@@ -414,6 +453,7 @@ class ConfigRegistryTest extends TestCase
             $registry->seal();
             $this->fail('Expected InvalidConfigException.');
         } catch (InvalidConfigException $e) {
+            $this->assertStringContainsString('modules-enabled/foo.toml', $e->getMessage());
             $this->assertStringContainsString('modules.foo.main', $e->getMessage());
             $this->assertStringContainsString('section path', $e->getMessage());
         }

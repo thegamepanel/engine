@@ -245,15 +245,18 @@ class TomlLoaderTest extends TestCase
     }
 
     /**
-     * - A reserved key declared via a drop-in file also throws.
+     * - A reserved key declared via a drop-in file throws, naming the drop-in path.
      */
     #[Test]
     public function reservedKeyInDropInThrows(): void
     {
-        $this->expectException(InvalidConfigException::class);
-        $this->expectExceptionMessageMatches('/"modules" is reserved/');
-
-        new TomlLoader()->load($this->pathsFor('reserved-via-dropin'));
+        try {
+            new TomlLoader()->load($this->pathsFor('reserved-via-dropin'));
+            $this->fail('Expected InvalidConfigException.');
+        } catch (InvalidConfigException $e) {
+            $this->assertStringContainsString('"modules" is reserved', $e->getMessage());
+            $this->assertStringContainsString('config.d/01-bad.toml', $e->getMessage());
+        }
     }
 
     // -------------------------------------------------------------------------

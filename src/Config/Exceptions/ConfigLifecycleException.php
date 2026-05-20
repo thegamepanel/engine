@@ -18,6 +18,11 @@ final class ConfigLifecycleException extends LogicException implements ConfigExc
         return new self('The config registry has already been sealed.');
     }
 
+    public static function sealBeforeCoreSeal(): self
+    {
+        return new self('seal() cannot be called before sealCore().');
+    }
+
     public static function registerBeforeCoreSeal(): self
     {
         return new self('Module configs cannot be registered before sealCore() has been called.');

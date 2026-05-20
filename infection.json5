@@ -102,8 +102,8 @@
         // to glob() which returns false on a non-existent dir, then `?: []`
         // produces an empty array, the sort is a no-op, and the same shape is
         // returned at the end of the method. Behaviourally indistinguishable.
-        "Engine\\Config\\TomlLoader::readModulesEnabled::140",
-        "Engine\\Config\\TomlLoader::readDropIns::205",
+        "Engine\\Config\\TomlLoader::readModulesEnabled::144",
+        "Engine\\Config\\TomlLoader::readDropIns::209",
         // Removing the socket DSN return falls through to the host-DSN return,
         // producing a different DSN that PDO also rejects. Both paths surface
         // as ConnectionException on the unit-test side. The Linux-only socket
@@ -121,8 +121,19 @@
         // environment. Kept defensively to guarantee deterministic ordering on
         // filesystems where readdir order is unsorted (e.g. some network or
         // tmpfs setups).
-        "Engine\\Config\\TomlLoader::readModulesEnabled::144",
-        "Engine\\Config\\TomlLoader::readDropIns::209"
+        "Engine\\Config\\TomlLoader::readModulesEnabled::148",
+        "Engine\\Config\\TomlLoader::readDropIns::213"
+      ]
+    },
+    "MethodCallRemoval"          : {
+      "ignore": [
+        // ConnectionConfig's constructor invariants guarantee these are
+        // non-null when socket is null. The asserts are defensive — they
+        // encode the invariant for PHPStan and any future maintainer, but
+        // they're behaviourally unreachable so the test suite can't kill
+        // these mutants without injecting an impossible state.
+        "Engine\\Database\\ConnectionFactory::createMysqlPdoDsn::139",
+        "Engine\\Database\\ConnectionFactory::createMysqlPdoDsn::140"
       ]
     },
     "MatchArmRemoval"            : {
