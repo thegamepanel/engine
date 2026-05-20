@@ -271,4 +271,74 @@ class ConnectionConfigTest extends TestCase
             'password' => 'p',
         ]);
     }
+
+    // -------------------------------------------------------------------------
+    // make() validation
+    // -------------------------------------------------------------------------
+
+    /**
+     * - make() rejects empty database.
+     */
+    #[Test]
+    public function makeThrowsWhenDatabaseIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ConnectionConfig::make('localhost', 3306, null, '', 'u', 'p');
+    }
+
+    /**
+     * - make() rejects empty username.
+     */
+    #[Test]
+    public function makeThrowsWhenUsernameIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ConnectionConfig::make('localhost', 3306, null, 'db', '', 'p');
+    }
+
+    /**
+     * - make() rejects empty password.
+     */
+    #[Test]
+    public function makeThrowsWhenPasswordIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ConnectionConfig::make('localhost', 3306, null, 'db', 'u', '');
+    }
+
+    /**
+     * - make() rejects empty socket.
+     */
+    #[Test]
+    public function makeThrowsWhenSocketIsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ConnectionConfig::make(null, null, '', 'db', 'u', 'p');
+    }
+
+    /**
+     * - make() rejects null host when socket is also null.
+     */
+    #[Test]
+    public function makeThrowsWhenNoHostNoSocket(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ConnectionConfig::make(null, 3306, null, 'db', 'u', 'p');
+    }
+
+    /**
+     * - make() rejects null port when socket is also null.
+     */
+    #[Test]
+    public function makeThrowsWhenNoPortNoSocket(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ConnectionConfig::make('localhost', null, null, 'db', 'u', 'p');
+    }
 }

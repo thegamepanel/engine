@@ -54,21 +54,14 @@ final readonly class ConnectionConfig implements ConfigObject
     public static function fromArray(array $data): static
     {
         Assert::keyExists($data, 'database', 'Database name is not defined.');
-        Assert::stringNotEmpty($data['database'], 'Database name is not defined.');
-
         Assert::keyExists($data, 'username', 'Username is not defined.');
-        Assert::stringNotEmpty($data['username'], 'Username is not defined.');
-
         Assert::keyExists($data, 'password', 'Password is not defined.');
-        Assert::stringNotEmpty($data['password'], 'Password is not defined.');
 
         if (isset($data['options'])) {
             Assert::isArray($data['options'], 'Options is not an array.');
         }
 
         if (isset($data['socket'])) {
-            Assert::stringNotEmpty($data['socket'], 'Socket path is not defined.');
-
             /**
              * @var array{
              *  socket: string,
@@ -91,7 +84,6 @@ final readonly class ConnectionConfig implements ConfigObject
         }
 
         Assert::keyExists($data, 'host', 'Host is not defined.');
-        Assert::stringNotEmpty($data['host'], 'Host is not defined.');
         Assert::keyExists($data, 'port', 'Port is not defined.');
         Assert::integer($data['port'], 'Port is not an integer.');
 
@@ -136,6 +128,17 @@ final readonly class ConnectionConfig implements ConfigObject
         public string  $password,
         public array   $options = [],
     ) {
+        Assert::stringNotEmpty($database, 'Database name is not defined.');
+        Assert::stringNotEmpty($username, 'Username is not defined.');
+        Assert::stringNotEmpty($password, 'Password is not defined.');
+
+        if ($socket !== null) {
+            Assert::stringNotEmpty($socket, 'Socket path is not defined.');
+        } else {
+            Assert::stringNotEmpty($host, 'Host is not defined.');
+            Assert::notNull($port, 'Port is not defined.');
+        }
+
         $this->driver = 'mysql';
     }
 }

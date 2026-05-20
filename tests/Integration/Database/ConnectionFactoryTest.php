@@ -91,28 +91,6 @@ class ConnectionFactoryTest extends TestCase
         $this->assertInstanceOf(Connection::class, $factory->make('default'));
     }
 
-    /**
-     * - make() connects successfully when port is null, using the default port.
-     */
-    #[Test]
-    public function makeConnectsWithNullPort(): void
-    {
-        $config = ConnectionConfig::make(
-            host: (string) (getenv('DB_HOST') ?: '127.0.0.1'),
-            port: null,
-            socket: null,
-            database: (string) (getenv('DB_DATABASE') ?: 'engine_test'),
-            username: (string) (getenv('DB_USERNAME') ?: 'engine'),
-            password: (string) (getenv('DB_PASSWORD') ?: 'secret'),
-        );
-
-        $factory = new ConnectionFactory(
-            DatabaseConfig::make('default', ['default' => $config]),
-        );
-
-        $this->assertInstanceOf(Connection::class, $factory->make('default'));
-    }
-
     // -------------------------------------------------------------------------
     // make() - PDO options
     // -------------------------------------------------------------------------

@@ -5,6 +5,7 @@ namespace Engine\Database\Config;
 
 use Engine\Config\Contracts\ConfigObject;
 use Webmozart\Assert\Assert;
+use Webmozart\Assert\InvalidArgumentException;
 
 /**
  * Database Config
@@ -42,23 +43,11 @@ final readonly class DatabaseConfig implements ConfigObject
      */
     public static function fromArray(array $data): static
     {
-        // Validate the 'primary' config option is a non-empty string, and
-        // present in the data.
+        // Array-shape assertions only. Value-rule assertions live in the
+        // constructor so that make() cannot bypass them.
         Assert::keyExists($data, 'primary', 'Primary connection is not defined.');
-        Assert::stringNotEmpty($data['primary'], 'Primary connection is not defined.');
-
-        // Validate the 'connections' config option is an array, and present in
-        // the data.
         Assert::keyExists($data, 'connections', 'No connections defined.');
         Assert::isArray($data['connections'], 'No connections defined.');
-        Assert::notEmpty($data['connections'], 'No connections defined.');
-
-        // Validate that the primary connection is an actual connection.
-        Assert::keyExists(
-            $data['connections'],
-            $data['primary'],
-            'Primary connection is not present in connections list.',
-        );
 
         if (isset($data['persistent'])) {
             Assert::boolean($data['persistent'], 'Persistent connection flag is not a boolean.');
@@ -66,19 +55,46 @@ final readonly class DatabaseConfig implements ConfigObject
 
         /**
          * @var array{
-         *     primary: non-empty-string,
-         *     connections: array<non-empty-string, array<string, mixed>>,
+         *     primary: string,
+         *     connections: array<string, array<string, mixed>>,
          *     persistent?: bool,
          * } $data
          */
 
         return new self(
             $data['primary'],
-            array_map(static function ($connection) {
-                return ConnectionConfig::fromArray($connection);
-            }, $data['connections']),
+            self::hydrateConnections($data['connections']),
             $data['persistent'] ?? false,
         );
+    }
+
+    /**
+     * Hydrate an array of raw connection arrays into ConnectionConfig instances.
+     *
+     * @param array<string, mixed> $connections
+     *
+     * @return array<string, ConnectionConfig>
+     */
+    private static function hydrateConnections(array $connections): array
+    {
+        $hydrated = [];
+
+        foreach ($connections as $name => $connection) {
+            $message = 'Connection \'' . $name . '\' is invalid: ';
+
+            // isMap narrows mixed → array<string, mixed>; notEmpty then rules
+            // out the empty array case.
+            Assert::isMap($connection, $message . 'Config is not an array');
+            Assert::notEmpty($connection, $message . 'Config is not an array');
+
+            try {
+                $hydrated[$name] = ConnectionConfig::fromArray($connection);
+            } catch (InvalidArgumentException $e) {
+                throw new InvalidArgumentException($message . $e->getMessage(), $e->getCode(), $e);
+            }
+        }
+
+        return $hydrated;
     }
 
     /**
@@ -91,5 +107,9 @@ final readonly class DatabaseConfig implements ConfigObject
         public array $connections,
         public bool $persistent,
     ) {
+        Assert::stringNotEmpty($primary, 'Primary connection is not defined.');
+        Assert::notEmpty($connections, 'No connections defined.');
+        Assert::keyExists($connections, $primary, 'Primary connection is not present in connections list.');
+        Assert::allIsInstanceOf($connections, ConnectionConfig::class, 'Connections must be ConnectionConfig instances.');
     }
 }

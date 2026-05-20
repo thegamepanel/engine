@@ -67,6 +67,40 @@ class DatabaseConfigTest extends TestCase
     }
 
     /**
+     * - fromArray() hydrates every connection in the array, not just the
+     *   primary, and returns them all on the resulting config.
+     */
+    #[Test]
+    public function fromArrayHydratesAllConnections(): void
+    {
+        $config = DatabaseConfig::fromArray([
+            'primary'     => 'default',
+            'connections' => [
+                'default' => [
+                    'host'     => 'localhost',
+                    'port'     => 3306,
+                    'database' => 'app',
+                    'username' => 'app',
+                    'password' => 'secret',
+                ],
+                'reports' => [
+                    'host'     => 'reports.local',
+                    'port'     => 3307,
+                    'database' => 'reports',
+                    'username' => 'reporter',
+                    'password' => 'reporter-secret',
+                ],
+            ],
+        ]);
+
+        $this->assertCount(2, $config->connections);
+        $this->assertArrayHasKey('default', $config->connections);
+        $this->assertArrayHasKey('reports', $config->connections);
+        $this->assertSame('reports.local', $config->connections['reports']->host);
+        $this->assertSame(3307, $config->connections['reports']->port);
+    }
+
+    /**
      * - fromArray() preserves persistent=true when present.
      */
     #[Test]
@@ -223,5 +257,111 @@ class DatabaseConfigTest extends TestCase
                 ],
             ],
         ]);
+    }
+
+    /**
+     * - fromArray() throws when a connection entry is not an array.
+     */
+    #[Test]
+    public function fromArrayThrowsWhenConnectionIsNotArray(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Connection \'default\' is invalid: Config is not an array');
+
+        DatabaseConfig::fromArray([
+            'primary'     => 'default',
+            'connections' => [
+                'default' => 'not-an-array',
+            ],
+        ]);
+    }
+
+    /**
+     * - fromArray() throws when a connection entry is an empty array.
+     */
+    #[Test]
+    public function fromArrayThrowsWhenConnectionIsEmptyArray(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Connection \'default\' is invalid: Config is not an array');
+
+        DatabaseConfig::fromArray([
+            'primary'     => 'default',
+            'connections' => [
+                'default' => [],
+            ],
+        ]);
+    }
+
+    /**
+     * - fromArray() wraps inner ConnectionConfig::fromArray failures with the
+     *   connection name as a prefix.
+     */
+    #[Test]
+    public function fromArrayWrapsInnerConnectionConfigFailures(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Connection \'default\' is invalid: Database name is not defined.');
+
+        DatabaseConfig::fromArray([
+            'primary'     => 'default',
+            'connections' => [
+                'default' => [
+                    'host'     => 'localhost',
+                    'port'     => 3306,
+                    'username' => 'u',
+                    'password' => 'p',
+                ],
+            ],
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // make() validation
+    // -------------------------------------------------------------------------
+
+    /**
+     * - make() rejects empty primary.
+     */
+    #[Test]
+    public function makeThrowsWhenPrimaryIsEmpty(): void
+    {
+        $connection = ConnectionConfig::make('localhost', 3306, null, 'db', 'u', 'p');
+
+        $this->expectException(InvalidArgumentException::class);
+        DatabaseConfig::make('', ['default' => $connection]);
+    }
+
+    /**
+     * - make() rejects empty connections array.
+     */
+    #[Test]
+    public function makeThrowsWhenConnectionsEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        DatabaseConfig::make('default', []);
+    }
+
+    /**
+     * - make() rejects primary not present in connections.
+     */
+    #[Test]
+    public function makeThrowsWhenPrimaryNotInConnections(): void
+    {
+        $connection = ConnectionConfig::make('localhost', 3306, null, 'db', 'u', 'p');
+
+        $this->expectException(InvalidArgumentException::class);
+        DatabaseConfig::make('missing', ['default' => $connection]);
+    }
+
+    /**
+     * - make() rejects non-ConnectionConfig values in the connections array.
+     */
+    #[Test]
+    public function makeThrowsWhenConnectionsContainNonConnectionConfig(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        /** @phpstan-ignore-next-line - deliberately wrong type for the test */
+        DatabaseConfig::make('default', ['default' => 'not-a-connection-config']);
     }
 }

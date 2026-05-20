@@ -124,7 +124,7 @@ final class ConnectionFactory
      */
     private function createMysqlPdoDsn(ConnectionConfig $config): string
     {
-        if ($config->socket) {
+        if ($config->socket !== null) {
             return sprintf(
                 'mysql:unix_socket=%s;dbname=%s',
                 $config->socket,
@@ -132,15 +132,13 @@ final class ConnectionFactory
             );
         }
 
-        if ($config->host) {
-            return sprintf(
-                'mysql:host=%s;port=%d;dbname=%s',
-                $config->host,
-                $config->port ?? 3306,
-                $config->database,
-            );
-        }
-
-        throw new DatabaseException('No host or socket specified.');
+        // ConnectionConfig guarantees a non-null host when socket is null, so
+        // we don't need a fallback branch here.
+        return sprintf(
+            'mysql:host=%s;port=%d;dbname=%s',
+            $config->host,
+            $config->port,
+            $config->database,
+        );
     }
 }
