@@ -4,6 +4,7 @@ on: [ pull_request ]
 
 jobs:
   run:
+    name: Static Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

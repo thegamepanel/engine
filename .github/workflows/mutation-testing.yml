@@ -4,6 +4,7 @@ on: [ pull_request ]
 
 jobs:
   run:
+    name: Mutation Testing
     runs-on: ubuntu-latest
     services:
       mysql:
