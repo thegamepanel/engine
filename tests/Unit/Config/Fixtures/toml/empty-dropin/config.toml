@@ -1,0 +1,4 @@
+title = "Base With Empty Drop-In"
+
+[database]
+host = "localhost"

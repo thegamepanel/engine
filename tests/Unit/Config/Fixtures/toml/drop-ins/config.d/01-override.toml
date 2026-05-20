@@ -1,0 +1,7 @@
+title = "Overridden"
+
+[database]
+hosts = ["dropin-a", "dropin-b"]
+
+[database.connections.default]
+port = 5432

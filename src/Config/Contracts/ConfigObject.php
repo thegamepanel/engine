@@ -7,22 +7,19 @@ namespace Engine\Config\Contracts;
  * -------------
  *
  * Interface represents the concept of a configuration object, used by the
- * config component. The interface is required because it ensures that the
- * <code>__set_state</code> magic method exists so that the object can be
- * cached.
+ * config component.
  */
 interface ConfigObject
 {
     /**
-     * Set the object state.
+     * Create a new config object from an array.
      *
-     * This method is called by PHP when restoring an object exported via
-     * <code>var_export()</code>, allowing cached config objects to be
-     * reconstituted from their exported state.
+     * Creates a new instance of the config object using the provided data
+     * pulled from the config storage.
      *
-     * @param array<string|int, mixed> $data
+     * @param array<string, mixed> $data
      *
      * @return static
      */
-    public static function __set_state(array $data): static;
+    public static function fromArray(array $data): static;
 }

@@ -1,0 +1,2 @@
+[database]
+password = "${SECRET_THAT_IS_NOT_SET}"

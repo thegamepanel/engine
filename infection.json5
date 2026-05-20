@@ -1,15 +1,16 @@
 {
-  "$schema" : "vendor/infection/infection/resources/schema.json",
-  "source"  : {
+  "$schema"           : "vendor/infection/infection/resources/schema.json",
+  "source"            : {
     "directories": [
       "src"
     ]
   },
-  "logs"    : {
+  "staticAnalysisTool": "phpstan",
+  "logs"              : {
     "text": "build/infection.txt",
     "html": "build/infection.html"
   },
-  "mutators": {
+  "mutators"          : {
     "@default"                   : true,
     "TrueValue"                  : {
       "ignore": [
@@ -96,7 +97,25 @@
         "Engine\\Container\\Container::invokeClassMethod::350",
         "Engine\\Database\\Query\\Concerns\\HasJoinClause::buildJoinClause::97",
         "Engine\\Values\\ValueGetter::float::110",
-        "Engine\\Values\\ValueGetter::int::135"
+        "Engine\\Values\\ValueGetter::int::135",
+        // Removing the early-return when the directory is missing falls through
+        // to glob() which returns false on a non-existent dir, then `?: []`
+        // produces an empty array, the sort is a no-op, and the same shape is
+        // returned at the end of the method. Behaviourally indistinguishable.
+        "Engine\\Config\\TomlLoader::readModulesEnabled::140",
+        "Engine\\Config\\TomlLoader::readDropIns::205"
+      ]
+    },
+    "FunctionCallRemoval"        : {
+      "ignore": [
+        // glob() already returns paths in alphabetical order on every common
+        // filesystem (HFS+/APFS/ext4 with default mount), so removing
+        // sort($files, SORT_STRING) is indistinguishable in any practical test
+        // environment. Kept defensively to guarantee deterministic ordering on
+        // filesystems where readdir order is unsorted (e.g. some network or
+        // tmpfs setups).
+        "Engine\\Config\\TomlLoader::readModulesEnabled::144",
+        "Engine\\Config\\TomlLoader::readDropIns::209"
       ]
     },
     "MatchArmRemoval"            : {

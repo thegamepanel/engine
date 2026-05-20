@@ -1,0 +1,10 @@
+title = "${APP_NAME}"
+literal = "no-interp-here"
+dsn = "${DB_HOST}:${DB_PORT}"
+fallback = "${MISSING_VAR:-default-value}"
+
+[database]
+password = "${DB_PASS}"
+tags = ["${TAG_ONE}", "literal-tag", "${TAG_TWO}"]
+keep_int = 3306
+keep_bool = true
