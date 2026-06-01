@@ -1,0 +1,9 @@
+title = "Base"
+
+[database]
+primary = "default"
+hosts = ["base-a", "base-b"]
+
+[database.connections.default]
+host = "localhost"
+port = 3306

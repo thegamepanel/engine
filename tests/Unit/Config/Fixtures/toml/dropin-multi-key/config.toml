@@ -1,0 +1,4 @@
+title = "base-title"
+
+[database]
+host = "base-host"

@@ -1,0 +1,4 @@
+title = "Bad"
+
+[modules.foo]
+some_setting = "user wrote this"

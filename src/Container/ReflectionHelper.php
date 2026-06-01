@@ -173,7 +173,7 @@ final readonly class ReflectionHelper
         }
 
         if (is_array($function)) {
-            /** @var array{0: class-string|object, 1: string} $function */
+            /** @var array{0: class-string|object, 1: string}&callable $function */
             if (is_object($function[0])) {
                 return $function[0]::class . '::' . $function[1];
             }

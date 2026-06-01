@@ -48,7 +48,7 @@ final class Container
     private array $namedInstances = [];
 
     /**
-     * @var array<class-string, array{Qualifier, object}>
+     * @var array<class-string, array<array{Qualifier, object}>>
      */
     private array $qualifiedInstances = [];
 
@@ -210,7 +210,7 @@ final class Container
         }
 
         if ($resolution->isQualified()) {
-            /** @var array{Qualifier, object} $instances */
+            /** @var array<array{Qualifier, object}> $instances */
             $instances = $this->qualifiedInstances[$resolution->class] ?? [];
 
             /**

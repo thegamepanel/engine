@@ -9,6 +9,7 @@ use Engine\Database\Exceptions\ConnectionException;
 use Engine\Database\Exceptions\DatabaseException;
 use PDO;
 use PDOException;
+use Webmozart\Assert\Assert;
 
 /**
  * Connection factory
@@ -124,7 +125,7 @@ final class ConnectionFactory
      */
     private function createMysqlPdoDsn(ConnectionConfig $config): string
     {
-        if ($config->socket) {
+        if ($config->socket !== null) {
             return sprintf(
                 'mysql:unix_socket=%s;dbname=%s',
                 $config->socket,
@@ -132,15 +133,17 @@ final class ConnectionFactory
             );
         }
 
-        if ($config->host) {
-            return sprintf(
-                'mysql:host=%s;port=%d;dbname=%s',
-                $config->host,
-                $config->port ?? 3306,
-                $config->database,
-            );
-        }
+        // ConnectionConfig's constructor invariants guarantee these are
+        // non-null when socket is null. The asserts encode that invariant
+        // for both PHPStan and any future maintainer.
+        Assert::notNull($config->host, 'Host must be set when socket is null.');
+        Assert::notNull($config->port, 'Port must be set when socket is null.');
 
-        throw new DatabaseException('No host or socket specified.');
+        return sprintf(
+            'mysql:host=%s;port=%d;dbname=%s',
+            $config->host,
+            $config->port,
+            $config->database,
+        );
     }
 }

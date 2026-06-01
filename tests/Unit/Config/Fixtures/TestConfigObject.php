@@ -5,10 +5,15 @@ namespace Tests\Unit\Config\Fixtures;
 
 use Engine\Config\Contracts\ConfigObject;
 
-final class TestConfigObject implements ConfigObject
+final readonly class TestConfigObject implements ConfigObject
 {
-    public static function __set_state(array $data): static
+    public static function fromArray(array $data): static
     {
-        return new self();
+        return new self($data['value'] ?? null);
+    }
+
+    public function __construct(
+        public mixed $value = null,
+    ) {
     }
 }

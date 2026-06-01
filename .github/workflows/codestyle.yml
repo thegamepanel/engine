@@ -3,7 +3,8 @@ name: Code Style
 on: [ pull_request ]
 
 jobs:
-  run:
+  codestyle:
+    name: Code Style
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

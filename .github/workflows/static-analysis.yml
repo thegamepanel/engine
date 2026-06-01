@@ -3,7 +3,8 @@ name: Static Analysis
 on: [ pull_request ]
 
 jobs:
-  run:
+  static-analysis:
+    name: Static Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,4 +19,4 @@ jobs:
         run: composer self-update && composer install && composer dump-autoload
 
       - name: Run static analysis
-        run: composer analyze
+        run: composer analyse

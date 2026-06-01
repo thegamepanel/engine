@@ -1,0 +1,2 @@
+[modules.foo]
+some_setting = "smuggled via drop-in"

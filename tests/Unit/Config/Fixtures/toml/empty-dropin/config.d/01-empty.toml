@@ -1,0 +1,3 @@
+# Empty [database] table - parses to an empty array under 'database' key.
+# Exercises the empty-array branch in TomlLoader::isIndexed() via deepMerge.
+[database]
