@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Config;
 
-use Engine\Config\ConfigPaths;
 use Engine\Config\Env;
 use Engine\Config\Exceptions\InvalidConfigException;
+use Engine\Config\Paths;
 use Engine\Config\TomlLoader;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -524,12 +524,14 @@ class TomlLoaderTest extends TestCase
         }
     }
 
-    private function pathsFor(string $scenario): ConfigPaths
+    private function pathsFor(string $scenario): Paths
     {
-        return new ConfigPaths(
-            configFile: $this->fixtureRoot . '/' . $scenario . '/config.toml',
-            configDir: $this->fixtureRoot . '/' . $scenario . '/config.d',
-            modulesEnabledDir: $this->fixtureRoot . '/' . $scenario . '/modules-enabled',
+        return new Paths(
+            $this->fixtureRoot . '/' . $scenario,
+            $this->fixtureRoot . '/' . $scenario . '/data',
+            $this->fixtureRoot . '/' . $scenario . '/modules',
+            $this->fixtureRoot . '/' . $scenario . '/cache',
+            $this->fixtureRoot . '/' . $scenario . '/logs',
         );
     }
 
