@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Config;
 
-use Engine\Config\ConfigPaths;
 use Engine\Config\ConfigRegistry;
 use Engine\Config\CoreConfig;
 use Engine\Config\Env;
 use Engine\Config\Modules\ModulesEnabled;
+use Engine\Config\Paths;
 use Engine\Config\TomlLoader;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -41,10 +41,12 @@ class EndToEndTest extends TestCase
     #[Test]
     public function happyPath(): void
     {
-        $paths = new ConfigPaths(
-            configFile: __DIR__ . '/Fixtures/toml/e2e/config.toml',
-            configDir: __DIR__ . '/Fixtures/toml/e2e/config.d',
-            modulesEnabledDir: __DIR__ . '/Fixtures/toml/e2e/modules-enabled',
+        $paths = new Paths(
+            __DIR__ . '/Fixtures/toml/e2e/',
+            __DIR__ . '/Fixtures/toml/e2e/data/',
+            __DIR__ . '/Fixtures/toml/e2e/modules/',
+            __DIR__ . '/Fixtures/toml/e2e/cache/',
+            __DIR__ . '/Fixtures/toml/e2e/logs/',
         );
 
         $tree     = new TomlLoader()->load($paths);

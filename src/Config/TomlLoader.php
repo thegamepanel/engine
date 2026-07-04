@@ -28,24 +28,26 @@ final class TomlLoader
     /**
      * Load the config tree from the filesystem.
      *
-     * @param ConfigPaths $paths
+     * @param Paths $paths
      *
      * @return array<string, mixed>
      *
      * @throws InvalidConfigException
      */
-    public function load(ConfigPaths $paths): array
+    public function load(Paths $paths): array
     {
-        $tree = $this->readMain($paths->configFile);
-        $this->assertNoReservedKeys($tree, $paths->configFile);
+        $configFile = $paths->config('config.toml');
+        $tree       = $this->readMain($configFile);
 
-        foreach ($this->readDropIns($paths->configDir) as $file => $dropIn) {
+        $this->assertNoReservedKeys($tree, $configFile);
+
+        foreach ($this->readDropIns($paths->config('config.d')) as $file => $dropIn) {
             $this->assertNoReservedKeys($dropIn, $file);
             /** @var array<string, mixed> $tree */
             $tree = $this->deepMerge($tree, $dropIn);
         }
 
-        [$moduleTrees, $enabledList] = $this->readModulesEnabled($paths->modulesEnabledDir);
+        [$moduleTrees, $enabledList] = $this->readModulesEnabled($paths->config('modules-enabled'));
 
         $tree['modules']           = $moduleTrees;
         $tree['__enabled_modules'] = $enabledList;

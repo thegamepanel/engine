@@ -102,8 +102,8 @@
         // to glob() which returns false on a non-existent dir, then `?: []`
         // produces an empty array, the sort is a no-op, and the same shape is
         // returned at the end of the method. Behaviourally indistinguishable.
-        "Engine\\Config\\TomlLoader::readModulesEnabled::144",
-        "Engine\\Config\\TomlLoader::readDropIns::217",
+        "Engine\\Config\\TomlLoader::readModulesEnabled::146",
+        "Engine\\Config\\TomlLoader::readDropIns::219",
         // Removing the socket DSN return falls through to the host-DSN return,
         // producing a different DSN that PDO also rejects. Both paths surface
         // as ConnectionException on the unit-test side. The Linux-only socket
@@ -121,8 +121,8 @@
         // environment. Kept defensively to guarantee deterministic ordering on
         // filesystems where readdir order is unsorted (e.g. some network or
         // tmpfs setups).
-        "Engine\\Config\\TomlLoader::readModulesEnabled::148",
-        "Engine\\Config\\TomlLoader::readDropIns::221"
+        "Engine\\Config\\TomlLoader::readModulesEnabled::150",
+        "Engine\\Config\\TomlLoader::readDropIns::223"
       ]
     },
     "MethodCallRemoval"          : {
