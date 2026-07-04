@@ -1,10 +1,20 @@
 name: Integration Tests
 
-on: [ pull_request ]
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   connection:
     name: Connection (MySQL 8.4)
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -37,7 +47,7 @@ jobs:
           --health-retries=10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up php 8.5
         uses: shivammathur/setup-php@v2
@@ -90,6 +100,7 @@ jobs:
 
   query-builder:
     name: Query Builder (${{ matrix.image }})
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -119,7 +130,7 @@ jobs:
           --health-retries=10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up php 8.5
         uses: shivammathur/setup-php@v2
