@@ -96,8 +96,8 @@ final class DecimalColumn extends BaseColumn
     private function __construct(
         string $name,
         string $type,
-        ?int $length = null,
-        ?int $decimals = null,
+        ?int   $length = null,
+        ?int   $decimals = null,
     ) {
         assert(in_array($type, [self::DECIMAL, self::FLOAT, self::DOUBLE]), 'Invalid column type: ' . $type);
 
@@ -130,7 +130,7 @@ final class DecimalColumn extends BaseColumn
                 if ($this->decimals !== null) {
                     $definition .= ',' . $this->decimals;
                 }
-            } else if ($this->decimals !== null) {
+            } else {
                 $definition .= $this->decimals;
             }
 
