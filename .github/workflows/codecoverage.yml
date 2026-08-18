@@ -55,10 +55,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+          tools: composer:2.9.3
           ini-values: zend.assertions=1
 
       - name: Install dependencies
-        run: composer self-update && composer install && composer dump-autoload
+        run: composer install --no-interaction --no-progress
 
       - name: Start MySQL socket container
         run: |
