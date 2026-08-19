@@ -10,8 +10,13 @@
 [![codecov](https://codecov.io/github/thegamepanel/engine/graph/badge.svg?token=CS2F99WQSJ)](https://codecov.io/github/thegamepanel/engine)
 
 The core engine that powers The Game Panel. It provides the foundational architecture that everything else is built on
-top of — the boot pipeline, kernel abstraction, module system, and the core concepts around contexts, roles, and
-permissions.
+top of.
 
 This package is to The Game Panel what laravel/framework is to Laravel. You wouldn't typically depend on this directly;
 instead, you'd install The Game Panel and build on top of it using the module system.
+
+> [!NOTE]
+> Pre-1.0 and under active development. What exists today is the dependency injection container, the config component
+> (TOML with env interpolation), the database layer (connections, query builder and schema), and the value casting
+> helpers. The boot pipeline, kernel abstraction, module system, and the concepts around contexts, roles and
+> permissions are all roadmap rather than shipped.

@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit'), Group('config'), Group('paths')]
-class ConfigPathsTest extends TestCase
+class PathsTest extends TestCase
 {
     /**
      * - The five paths are stored and read back unchanged.

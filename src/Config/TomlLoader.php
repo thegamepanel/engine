@@ -11,7 +11,7 @@ use Throwable;
  * TOML Loader
  * -----------
  *
- * Reads the TOML config files described by a ConfigPaths instance and produces
+ * Reads the TOML config files described by a Paths instance and produces
  * a single merged array tree. The loader has no knowledge of config objects,
  * registries, or catalogues — it is pure file-to-array translation plus env
  * interpolation.
