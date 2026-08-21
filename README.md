@@ -4,19 +4,20 @@
 
 ## Open-source game server management
 
-![GitHub License](https://img.shields.io/github/license/thegamepanel/engine)
+![GitHub License](https://img.shields.io/github/license/thegamepanel/panel)
 ![Packagist Version](https://img.shields.io/packagist/v/thegamepanel/engine)
 ![PHP Version](https://img.shields.io/badge/php-%3E%3D8.5-777BB4?logo=php&logoColor=white)
-[![codecov](https://codecov.io/github/thegamepanel/engine/graph/badge.svg?token=CS2F99WQSJ)](https://codecov.io/github/thegamepanel/engine)
+[![codecov](https://codecov.io/github/thegamepanel/panel/graph/badge.svg?token=CS2F99WQSJ)](https://codecov.io/github/thegamepanel/panel)
 
-The core engine that powers The Game Panel. It provides the foundational architecture that everything else is built on
-top of.
+Everything lives here: the `Engine\` layer providing the foundational architecture, the modules built on top of it,
+the worker entry point, and the build that produces the single binary. Third-party modules extend the panel through
+the same module system the first-party features are built on.
 
-This package is to The Game Panel what laravel/framework is to Laravel. You wouldn't typically depend on this directly;
-instead, you'd install The Game Panel and build on top of it using the module system.
+The panel ships as one binary running FrankenPHP in worker mode with Caddy underneath. The frontend is server-rendered
+HTML with hypermedia interactions.
 
 > [!NOTE]
 > Pre-1.0 and under active development. What exists today is the dependency injection container, the config component
 > (TOML with env interpolation), the database layer (connections, query builder and schema), and the value casting
-> helpers. The boot pipeline, kernel abstraction, module system, and the concepts around contexts, roles and
-> permissions are all roadmap rather than shipped.
+> helpers. The HTTP layer, boot pipeline, module system, and the concepts around contexts, roles and permissions are
+> all roadmap rather than shipped.
